@@ -8,4 +8,4 @@ reloadOnUpdate("pages/background");
  */
 reloadOnUpdate("pages/content/style.scss");
 
-console.log("background loaded");
+// console.log("background loaded");
