@@ -23,10 +23,10 @@ const manifest: chrome.runtime.ManifestV3 = {
   content_scripts: [
     {
       matches: [
-        'http://*/*',
-        'https://*/*',
-        '<all_urls>',
-        // "https://*.semrush.com/*",
+        // 'http://*/*',
+        // 'https://*/*',
+        // '<all_urls>',
+        'https://*.semrush.com/*',
       ],
       js: ['src/pages/content/index.js'],
       // KEY for cache invalidation
