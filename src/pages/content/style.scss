@@ -33,11 +33,23 @@
   [cmdk] {
     width: 640px;
     transform-origin: center center;
-    animation: dialogIn var(--transition-fast) forwards;
+    animation: 500ms ease slideIn;
   }
 
   &[data-state='closed'] [cmdk] {
-    animation: dialogOut var(--transition-fast) forwards;
+    animation: slideOut 200ms forwards;
+  }
+
+  @keyframes slideIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 }
 
@@ -49,6 +61,29 @@
   --border-secondary: #E0E1E9;
   --bg-primary-neutral: #FFF;
   --bg-secondary-info-hover: #C4E5FE;
+
+
+  --scrollbar-foreground: #E0E1E9;
+  --scrollbar-background: var(--bg-primary-neutral);
+
+  .snav-scrollbar {
+    scrollbar-color: var(--scrollbar-foreground) var(--scrollbar-background);
+  }
+
+  .snav-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .snav-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-foreground);
+    border-radius: 10px;
+    border: 1px solid var(--scrollbar-background);
+  }
+
+  .snav-scrollbar::-webkit-scrollbar-track {
+    background: var(--scrollbar-background);
+  }
 
   font-family: Inter;
   font-size: 16px;
@@ -62,6 +97,7 @@
   width: 100%;
   width: 640px;
   max-width: 640px;
+  max-height: calc(100vh - 96px);
 
   background: var(--bg-primary-neutral, #FFF);
   border-radius: 16px;
@@ -85,11 +121,15 @@
 
   .snav-content {
     flex: 1;
+    min-height: 0;
     display: flex;
   }
 
   .snav-list {
     min-width: 320px;
+    max-height: 100%;
+    scroll-padding-block-start: 8px;
+    scroll-padding-block-end: 8px;
   }
 
   .snav-details {
@@ -132,9 +172,9 @@
   color: var(--text-primary);
   padding: 8px 8px 8px 40px;
   transition: all 150ms ease;
-  transition-property: none;
 
   &[data-selected='true'] {
+    transition: all 50ms ease;
     background: var(--bg-secondary-info-hover, #C4E5FE);
   }
 
@@ -170,4 +210,28 @@
   padding: 32px;
   white-space: pre-wrap;
   color: var(--gray11);
+}
+
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
 }

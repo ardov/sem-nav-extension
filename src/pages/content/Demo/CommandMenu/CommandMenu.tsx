@@ -1,15 +1,21 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { Command } from 'cmdk'
-import { useAppReducer } from './useActions'
+import { initState, useAppReducer } from './state'
+import { useFilter } from './useFilter'
 
 export function CommandMenu() {
   const [open, setOpen] = React.useState(false)
   const [value, setValue] = React.useState<string>('')
   const [state, dispatch] = useAppReducer()
+  const filter = useFilter(state)
 
-  // Toggle the menu when ⌘K is pressed
+  React.useEffect(() => {
+    initState(dispatch)
+  }, [])
+
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
+      // Toggle the menu when ⌘K is pressed
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
         setOpen(open => !open)
@@ -19,13 +25,28 @@ export function CommandMenu() {
     return () => document.removeEventListener('keydown', down)
   }, [])
 
+  const toggleFav = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'l' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        dispatch({ type: 'favToggle', payload: value })
+      }
+    },
+    [value]
+  )
+
+  const currOption = state.options.find(o => o.id === value)
+  console.log('currOption', currOption, value, state.options)
+
   return (
     <Command.Dialog
       value={value}
       onValueChange={v => setValue(v)}
+      filter={filter}
       loop
       open={open}
       onOpenChange={setOpen}
+      onKeyDown={toggleFav}
     >
       <div className="snav-header">
         <Command.Input autoFocus placeholder="What are you looking for?" />
@@ -33,23 +54,41 @@ export function CommandMenu() {
       </div>
 
       <div className="snav-content">
-        <div className="snav-list">
-          <Command.List>
-            <Command.Empty>No results found.</Command.Empty>
-            {state.options.map(option => {
+        <Command.List className="snav-list snav-scrollbar">
+          <Command.Empty>No results found.</Command.Empty>
+          {state.favourites.length > 0 &&
+            state.favourites.map(fav => {
+              const option = state.options.find(o => o.id === fav)
               return (
                 <Command.Item
                   key={option.id}
                   value={option.id}
                   onSelect={() => dispatch(option.action)}
                 >
+                  {state.favourites.includes(option.id) && '★ '}
                   {option.name}
                 </Command.Item>
               )
             })}
-          </Command.List>
+
+          {state.options.map(option => {
+            if (state.favourites.includes(option.id)) return null
+            return (
+              <Command.Item
+                key={option.id}
+                value={option.id}
+                onSelect={() => dispatch(option.action)}
+              >
+                {state.favourites.includes(option.id) && '★ '}
+                {option.name}
+              </Command.Item>
+            )
+          })}
+        </Command.List>
+
+        <div className="snav-details snav-scrollbar">
+          {currOption?.description || currOption?.id}
         </div>
-        <div className="snav-details">{value}</div>
       </div>
     </Command.Dialog>
   )
