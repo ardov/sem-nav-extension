@@ -1,6 +1,6 @@
 import { useReducer } from 'react'
 import { footer, menu } from './elements'
-import { getOptions } from './getOptions'
+import { getOptions } from '../options/getOptions'
 
 type Act<T, P> = { type: T; payload: P }
 
@@ -92,7 +92,6 @@ export function useAppReducer() {
 
 export function initState(dispatch: React.Dispatch<Action>) {
   chrome.storage.local.get(['favourites'], result => {
-    console.log('initState', result)
     const favourites = result.favourites || []
     dispatch({ type: 'setFavourites', payload: favourites })
   })

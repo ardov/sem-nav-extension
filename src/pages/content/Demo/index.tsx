@@ -7,5 +7,4 @@ refreshOnUpdate('pages/content')
 const root = document.createElement('div')
 root.id = 'sem-nav-extension-root'
 document.body.append(root)
-
 createRoot(root).render(<App />)

@@ -1,4 +1,4 @@
-import { Option } from './state'
+import { Option } from '../CommandMenu/state'
 
 function parseLeftMenu(): Option[] {
   const ids = [] as string[]

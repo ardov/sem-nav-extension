@@ -1,6 +1,6 @@
-import React, { useCallback } from 'react'
+import React, { FC, useCallback, useEffect } from 'react'
 import { Command } from 'cmdk'
-import { initState, useAppReducer } from './state'
+import { Option, initState, useAppReducer } from './state'
 import { useFilter } from './useFilter'
 
 export function CommandMenu() {
@@ -8,6 +8,9 @@ export function CommandMenu() {
   const [value, setValue] = React.useState<string>('')
   const [state, dispatch] = useAppReducer()
   const filter = useFilter(state)
+  const setOpened = useCallback(() => setOpen(true), [])
+
+  useCommandTrigger(setOpened)
 
   React.useEffect(() => {
     initState(dispatch)
@@ -36,7 +39,6 @@ export function CommandMenu() {
   )
 
   const currOption = state.options.find(o => o.id === value)
-  console.log('currOption', currOption, value, state.options)
 
   return (
     <Command.Dialog
@@ -60,28 +62,22 @@ export function CommandMenu() {
             state.favourites.map(fav => {
               const option = state.options.find(o => o.id === fav)
               return (
-                <Command.Item
+                <OptionItem
                   key={option.id}
-                  value={option.id}
+                  option={option}
                   onSelect={() => dispatch(option.action)}
-                >
-                  {state.favourites.includes(option.id) && '★ '}
-                  {option.name}
-                </Command.Item>
+                />
               )
             })}
 
           {state.options.map(option => {
             if (state.favourites.includes(option.id)) return null
             return (
-              <Command.Item
+              <OptionItem
                 key={option.id}
-                value={option.id}
+                option={option}
                 onSelect={() => dispatch(option.action)}
-              >
-                {state.favourites.includes(option.id) && '★ '}
-                {option.name}
-              </Command.Item>
+              />
             )
           })}
         </Command.List>
@@ -108,3 +104,35 @@ const SearchIcon = (props: React.SVGProps<SVGSVGElement>) => (
     />
   </svg>
 )
+
+const OptionItem: FC<{
+  option: Option
+  isFvav?: boolean
+  onSelect: () => void
+}> = props => {
+  const { option, isFvav, onSelect } = props
+  return (
+    <Command.Item value={option.id} onSelect={onSelect}>
+      {isFvav && '★ '}
+      {option.name}
+    </Command.Item>
+  )
+}
+
+/** Add a button to the menu to open command menu */
+function useCommandTrigger(cb: () => void) {
+  useEffect(() => {
+    const ulRoot = document.getElementsByClassName(
+      'srf-report-sidebar-main'
+    )[0] as HTMLElement
+    const btn = document.createElement('button')
+    btn.className = 'snav-trigger'
+    btn.innerHTML = 'Command Menu'
+    btn.onclick = cb
+    ulRoot.insertBefore(btn, ulRoot.firstChild)
+
+    return () => {
+      ulRoot.removeChild(btn)
+    }
+  }, [cb])
+}
