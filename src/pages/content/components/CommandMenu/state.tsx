@@ -1,6 +1,6 @@
 import { useReducer } from 'react'
 import { footer, menu } from './elements'
-import { getOptions } from '../options/getOptions'
+import { getOptions } from '../options'
 
 type Act<T, P> = { type: T; payload: P }
 
@@ -16,10 +16,12 @@ export type Option = {
   id: string
   name: string
   action: Action
+  status?: 'new' | 'beta'
   caption?: string
   description?: string
+  tags?: string[]
   icon?: string
-  isFavourite?: boolean
+  iconUrl?: string
 }
 
 export type AppState = {
