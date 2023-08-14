@@ -65,6 +65,7 @@ export function CommandMenu() {
                 <OptionItem
                   key={option.id}
                   option={option}
+                  isFvav={true}
                   onSelect={() => dispatch(option.action)}
                 />
               )
@@ -83,7 +84,10 @@ export function CommandMenu() {
         </Command.List>
 
         <div className="snav-details snav-scrollbar">
-          {currOption?.description || currOption?.id}
+          <Description
+            option={currOption}
+            isFav={state.favourites.includes(currOption?.id)}
+          />
         </div>
       </div>
     </Command.Dialog>
@@ -116,6 +120,30 @@ const OptionItem: FC<{
       {isFvav && '★ '}
       {option.name}
     </Command.Item>
+  )
+}
+
+const Description: FC<{
+  option: Option
+  isFav?: boolean
+  onSelect?: () => void
+}> = props => {
+  const { option, isFav, onSelect } = props
+  if (!option) return null
+  return (
+    <>
+      <h2>
+        {option.name} {isFav ? '★' : ''}
+      </h2>
+      <p>{option.description}</p>
+      <div className="snav-tags">
+        {option.tags?.map(tag => (
+          <button key={tag} className="snav-tag">
+            {tag}
+          </button>
+        ))}
+      </div>
+    </>
   )
 }
 

@@ -1,4 +1,4 @@
-import { useReducer } from 'react'
+import { Dispatch, useCallback, useReducer } from 'react'
 import { footer, menu } from './elements'
 import { getOptions } from '../options'
 
@@ -15,7 +15,7 @@ type Action =
 export type Option = {
   id: string
   name: string
-  action: Action
+  action: Action | ((d: Dispatch<Action>) => void)
   status?: 'new' | 'beta'
   caption?: string
   description?: string
@@ -89,7 +89,18 @@ const reducer = (state: AppState, action: Action) => {
 }
 
 export function useAppReducer() {
-  return useReducer(reducer, initialState)
+  const [state, dispatch] = useReducer(reducer, initialState)
+  const withThunk = useCallback(
+    (action: Action | ((d: typeof dispatch) => void)) => {
+      if (typeof action === 'function') {
+        action(dispatch)
+      } else {
+        dispatch(action)
+      }
+    },
+    [dispatch]
+  )
+  return [state, withThunk] as [AppState, typeof withThunk]
 }
 
 export function initState(dispatch: React.Dispatch<Action>) {
