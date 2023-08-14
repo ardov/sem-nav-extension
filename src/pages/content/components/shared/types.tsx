@@ -1,5 +1,5 @@
 export type Link = {
-  type: 'tool' | 'extra-tool' | 'resource'
+  type: 'tool' | 'extra-tool' | 'resource' | 'app'
   id: string
   name: string
   url: string
@@ -7,5 +7,6 @@ export type Link = {
   projectUrl?: string
   description?: string
   tags?: string[]
-  icon?: string
+  iconUrl?: string
+  developer?: string
 }

@@ -153,6 +153,7 @@ function useCommandTrigger(cb: () => void) {
     const ulRoot = document.getElementsByClassName(
       'srf-report-sidebar-main'
     )[0] as HTMLElement
+    if (!ulRoot) return
     const btn = document.createElement('button')
     btn.className = 'snav-trigger'
     btn.innerHTML = 'Command Menu'
