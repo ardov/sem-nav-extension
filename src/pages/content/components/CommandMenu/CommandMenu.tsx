@@ -10,7 +10,7 @@ export function CommandMenu() {
   const filter = useFilter(state)
   const setOpened = useCallback(() => setOpen(true), [])
 
-  useCommandTrigger(setOpened)
+  // useCommandTrigger(setOpened)
 
   React.useEffect(() => {
     initState(dispatch)
@@ -71,16 +71,17 @@ export function CommandMenu() {
               )
             })}
 
-          {state.options.map(option => {
-            if (state.favourites.includes(option.id)) return null
-            return (
-              <OptionItem
-                key={option.id}
-                option={option}
-                onSelect={() => dispatch(option.action)}
-              />
-            )
-          })}
+          {state.options
+            .filter(opt => !state.favourites.includes(opt.id))
+            .map(option => {
+              return (
+                <OptionItem
+                  key={option.id}
+                  option={option}
+                  onSelect={() => dispatch(option.action)}
+                />
+              )
+            })}
         </Command.List>
 
         <div className="snav-details snav-scrollbar">
