@@ -15,4 +15,11 @@ export const other: Link[] = [
     description: 'Plans and prices.',
     url: 'https://www.semrush.com/pricing/',
   },
+  {
+    type: 'other',
+    id: 'projects',
+    name: 'Projects',
+    description: 'A list of your projects',
+    url: 'https://www.semrush.com/projects/',
+  },
 ]

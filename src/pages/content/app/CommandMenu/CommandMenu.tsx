@@ -1,53 +1,68 @@
-import type { Option } from '@src/model/options'
+import { $options, type Option } from '@src/model/options'
 import React, { FC, useCallback, useEffect, useMemo } from 'react'
 import { Command } from 'cmdk'
-import { useFilter } from '@src/model/useFilter'
-import { initState, useAppReducer } from '@src/model/state'
+import { scoreOption } from '@src/model/scoreOption'
 import { SearchIcon } from '@src/shared/icons'
+import { useStore } from '@nanostores/react'
+import { settings } from '@src/model/userSettings'
 
 export function CommandMenu() {
   const [open, setOpen] = React.useState(false)
   const [value, setValue] = React.useState<string>('')
   const [search, setSearch] = React.useState<string>('')
-  const [state, dispatch] = useAppReducer()
-  const filter = useFilter(state)
   const setOpened = useCallback(() => setOpen(true), [])
+  const options = useStore($options)
+  const userSettings = useStore(settings.store)
 
   // useCommandTrigger(setOpened)
 
   React.useEffect(() => {
-    initState(dispatch)
-  }, [])
-
-  React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
+      const key = userSettings.openKey
       // Toggle the menu when ⌘K is pressed
-      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+      if (e.key === key && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
         setOpen(open => !open)
       }
     }
     document.addEventListener('keydown', down)
     return () => document.removeEventListener('keydown', down)
-  }, [])
+  }, [userSettings.openKey])
 
   const toggleFav = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'l' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
-        dispatch({ type: 'favToggle', payload: value })
+        settings.toggleFavourite(value)
       }
     },
     [value]
   )
 
-  const currOption = state.options[value]
+  const ids = Object.entries(options)
+    .map(
+      ([id, option]) =>
+        [
+          id,
+          scoreOption(
+            option,
+            userSettings.favourites.includes(option.id),
+            search
+          ),
+        ] as [string, number]
+    )
+    .filter(([id, score]) => score > 0)
+    .sort((a, b) => b[1] - a[1])
+    .map(([id, score]) => id)
+
+  const currOption = options[value]
 
   return (
     <Command.Dialog
       value={value}
       onValueChange={setValue}
-      filter={filter}
+      // filter={filter}
+      shouldFilter={false}
       loop
       open={open}
       onOpenChange={setOpen}
@@ -66,14 +81,13 @@ export function CommandMenu() {
       <div className="snav-content">
         <Command.List className="snav-list snav-scrollbar">
           <Command.Empty>No results found.</Command.Empty>
-
-          {Object.values(state.options).map(option => {
+          {ids.map(id => {
             return (
               <OptionItem
-                key={option.id}
-                option={option}
-                isFav={state.favourites.includes(option.id)}
-                onSelect={() => dispatch(option.action)}
+                key={id}
+                option={options[id]}
+                isFav={userSettings.favourites.includes(id)}
+                onSelect={options[id].action}
               />
             )
           })}
@@ -82,7 +96,7 @@ export function CommandMenu() {
         <div className="snav-details snav-scrollbar">
           <Description
             option={currOption}
-            isFav={state.favourites.includes(currOption?.id)}
+            isFav={userSettings.favourites.includes(currOption?.id)}
           />
         </div>
       </div>
