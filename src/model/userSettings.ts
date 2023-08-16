@@ -33,13 +33,19 @@ onMount($rawSettings, () => {
     changes: { [key: string]: chrome.storage.StorageChange },
     areaName: 'sync' | 'local' | 'managed' | 'session'
   ) => void = (changes, namespace) => {
-    if (namespace === 'local') {
-      const nextValue = {}
-      keys.forEach(key => {
-        nextValue[key] = changes[key]?.newValue
-      })
-      $rawSettings.set(nextValue)
-    }
+    if (namespace !== 'local') return
+    const prevValue = $rawSettings.get()
+    const updates = {}
+    Object.entries(changes).forEach(([key, change]) => {
+      if (
+        keys.includes(key as keyof RawSettings) &&
+        prevValue[key] !== change.newValue
+      ) {
+        updates[key] = change.newValue
+      }
+    })
+    if (Object.keys(updates).length === 0) return
+    $rawSettings.set({ ...prevValue, ...updates })
   }
   chrome.storage.onChanged.addListener(listener)
   return () => chrome.storage.onChanged.removeListener(listener)
@@ -88,6 +94,7 @@ const toggleFavourite = action(
   'toggleFavourite',
   (store, key) => {
     const current = store.get()['favourites']
+    if (!current) store.setKey('favourites', [key])
     if (current?.includes(key))
       store.setKey(
         'favourites',

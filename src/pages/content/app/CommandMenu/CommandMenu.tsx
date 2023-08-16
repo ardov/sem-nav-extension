@@ -13,12 +13,13 @@ export function CommandMenu() {
   const setOpened = useCallback(() => setOpen(true), [])
   const options = useStore($options)
   const userSettings = useStore(settings.store)
+  const { openKey, favourites } = userSettings
 
   // useCommandTrigger(setOpened)
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      const key = userSettings.openKey
+      const key = openKey
       // Toggle the menu when ⌘K is pressed
       if (e.key === key && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
@@ -27,7 +28,7 @@ export function CommandMenu() {
     }
     document.addEventListener('keydown', down)
     return () => document.removeEventListener('keydown', down)
-  }, [userSettings.openKey])
+  }, [openKey])
 
   const toggleFav = useCallback(
     (e: React.KeyboardEvent) => {
@@ -42,14 +43,10 @@ export function CommandMenu() {
   const ids = Object.entries(options)
     .map(
       ([id, option]) =>
-        [
-          id,
-          scoreOption(
-            option,
-            userSettings.favourites.includes(option.id),
-            search
-          ),
-        ] as [string, number]
+        [id, scoreOption(option, favourites.includes(option.id), search)] as [
+          string,
+          number,
+        ]
     )
     .filter(([id, score]) => score > 0)
     .sort((a, b) => b[1] - a[1])
@@ -86,7 +83,7 @@ export function CommandMenu() {
               <OptionItem
                 key={id}
                 option={options[id]}
-                isFav={userSettings.favourites.includes(id)}
+                isFav={favourites.includes(id)}
                 onSelect={options[id].action}
               />
             )
@@ -96,7 +93,7 @@ export function CommandMenu() {
         <div className="snav-details snav-scrollbar">
           <Description
             option={currOption}
-            isFav={userSettings.favourites.includes(currOption?.id)}
+            isFav={favourites.includes(currOption?.id)}
           />
         </div>
       </div>

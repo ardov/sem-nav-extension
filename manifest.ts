@@ -9,7 +9,7 @@ const manifest: chrome.runtime.ManifestV3 = {
   version: packageJson.version,
   description: packageJson.description,
   action: {
-    // default_popup: 'src/pages/popup/index.html',
+    default_popup: 'src/pages/popup/index.html',
     default_icon: 'icon-34.png',
   },
   icons: {

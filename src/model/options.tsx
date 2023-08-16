@@ -31,16 +31,6 @@ function getOptions(): Record<string, Option> {
       name: 'Toggle left menu',
       action: () => settings.toggleMenu(),
     },
-    {
-      id: 'set-to-p',
-      name: 'Set to Cmd+P',
-      action: () => settings.setOpenKey('p'),
-    },
-    {
-      id: 'set-to-k',
-      name: 'Set to Cmd+K',
-      action: () => settings.setOpenKey('k'),
-    },
     ...getLinks().map(linkToOption),
   ]
 

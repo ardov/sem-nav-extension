@@ -1,13 +1,13 @@
 class ElementToggler {
   constructor(private element: HTMLElement) {}
   get visible() {
-    return this.element.style.display !== 'none'
+    return this.element?.style.display !== 'none'
   }
   hide() {
-    this.element.style.display = 'none'
+    if (this.element) this.element.style.display = 'none'
   }
   show() {
-    this.element.style.display = 'block'
+    if (this.element) this.element.style.display = 'block'
   }
 }
 
