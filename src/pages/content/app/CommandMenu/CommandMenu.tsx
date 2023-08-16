@@ -1,11 +1,14 @@
-import React, { FC, useCallback, useEffect } from 'react'
+import type { Option } from '@src/model/options'
+import React, { FC, useCallback, useEffect, useMemo } from 'react'
 import { Command } from 'cmdk'
-import { Option, initState, useAppReducer } from './state'
-import { useFilter } from './useFilter'
+import { useFilter } from '@src/model/useFilter'
+import { initState, useAppReducer } from '@src/model/state'
+import { SearchIcon } from '@src/shared/icons'
 
 export function CommandMenu() {
   const [open, setOpen] = React.useState(false)
   const [value, setValue] = React.useState<string>('')
+  const [search, setSearch] = React.useState<string>('')
   const [state, dispatch] = useAppReducer()
   const filter = useFilter(state)
   const setOpened = useCallback(() => setOpen(true), [])
@@ -38,12 +41,12 @@ export function CommandMenu() {
     [value]
   )
 
-  const currOption = state.options.find(o => o.id === value)
+  const currOption = state.options[value]
 
   return (
     <Command.Dialog
       value={value}
-      onValueChange={v => setValue(v)}
+      onValueChange={setValue}
       filter={filter}
       loop
       open={open}
@@ -51,37 +54,29 @@ export function CommandMenu() {
       onKeyDown={toggleFav}
     >
       <div className="snav-header">
-        <Command.Input autoFocus placeholder="What are you looking for?" />
+        <Command.Input
+          autoFocus
+          placeholder="What are you looking for?"
+          value={search}
+          onValueChange={setSearch}
+        />
         <SearchIcon className="snav-search-icon" />
       </div>
 
       <div className="snav-content">
         <Command.List className="snav-list snav-scrollbar">
           <Command.Empty>No results found.</Command.Empty>
-          {state.favourites.length > 0 &&
-            state.favourites.map(fav => {
-              const option = state.options.find(o => o.id === fav)
-              return (
-                <OptionItem
-                  key={option.id}
-                  option={option}
-                  isFvav={true}
-                  onSelect={() => dispatch(option.action)}
-                />
-              )
-            })}
 
-          {state.options
-            .filter(opt => !state.favourites.includes(opt.id))
-            .map(option => {
-              return (
-                <OptionItem
-                  key={option.id}
-                  option={option}
-                  onSelect={() => dispatch(option.action)}
-                />
-              )
-            })}
+          {Object.values(state.options).map(option => {
+            return (
+              <OptionItem
+                key={option.id}
+                option={option}
+                isFav={state.favourites.includes(option.id)}
+                onSelect={() => dispatch(option.action)}
+              />
+            )
+          })}
         </Command.List>
 
         <div className="snav-details snav-scrollbar">
@@ -95,27 +90,12 @@ export function CommandMenu() {
   )
 }
 
-const SearchIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    fill="none"
-    {...props}
-  >
-    <path
-      fill="currentColor"
-      d="m14.7 13.3-4.5-4.6a5 5 0 1 0-1.5 1.5l4.6 4.5a1 1 0 0 0 1.6-1 1 1 0 0 0-.2-.4ZM3 6a3 3 0 1 1 6 0 3 3 0 0 1-6 0Z"
-    />
-  </svg>
-)
-
 const OptionItem: FC<{
   option: Option
-  isFvav?: boolean
+  isFav?: boolean
   onSelect: () => void
 }> = props => {
-  const { option, isFvav, onSelect } = props
+  const { option, isFav: isFvav, onSelect } = props
   return (
     <Command.Item value={option.id} onSelect={onSelect}>
       {isFvav && '★ '}

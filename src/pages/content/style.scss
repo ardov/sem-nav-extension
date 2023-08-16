@@ -22,8 +22,6 @@
   animation: 200ms ease-out slideIn;
   transform-origin: center center;
 
-
-
   &[data-state='closed'] {
     animation: 150ms ease-in slideOut;
   }

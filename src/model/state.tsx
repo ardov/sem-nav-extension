@@ -1,10 +1,11 @@
-import { Dispatch, useCallback, useReducer } from 'react'
+import type { Option } from './options'
+import { useCallback, useReducer } from 'react'
 import { footer, menu } from './elements'
-import { getOptions } from '../options'
+import { options } from './options'
 
 type Act<T, P> = { type: T; payload: P }
 
-type Action =
+export type Action =
   | Act<'goto', string>
   | Act<'favToggle', string>
   | Act<'toggleFooter', null>
@@ -12,40 +13,16 @@ type Action =
   | Act<'setFavourites', string[]>
   | Act<'setOptions', Option[]>
 
-export type Option = {
-  id: string
-  name: string
-  action: Action | ((d: Dispatch<Action>) => void)
-  status?: 'new' | 'beta'
-  caption?: string
-  description?: string
-  tags?: string[]
-  icon?: string
-  iconUrl?: string
-}
-
 export type AppState = {
   favourites: string[]
   pages: string[]
-  options: Option[]
+  options: Record<string, Option>
 }
 
 const initialState: AppState = {
   favourites: [],
   pages: [],
-  options: [
-    {
-      id: 'toggle-footer',
-      name: 'Toggle footer',
-      action: { type: 'toggleFooter', payload: null },
-    },
-    {
-      id: 'toggle-left-menu',
-      name: 'Toggle left menu',
-      action: { type: 'toggleLeftMenu', payload: null },
-    },
-    ...getOptions(),
-  ],
+  options,
 }
 
 const reducer = (state: AppState, action: Action) => {

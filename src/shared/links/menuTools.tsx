@@ -1,4 +1,4 @@
-import { Link } from '../shared/types'
+import { Link } from './types'
 
 export const menuTools: Link[] = [
   {

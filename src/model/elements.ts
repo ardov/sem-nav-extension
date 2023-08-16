@@ -1,5 +1,8 @@
 class ElementToggler {
-  constructor(private element: HTMLElement, private key: string) {
+  constructor(
+    private element: HTMLElement,
+    private key: string
+  ) {
     this.init()
   }
   get visible() {
@@ -31,3 +34,15 @@ export const menu = new ElementToggler(
   document.getElementsByClassName('srf-layout__sidebar')[0] as HTMLDivElement,
   'showMenu'
 )
+
+chrome.storage.onChanged.addListener(changes => {
+  for (const key in changes) {
+    if (key === 'showFooter') {
+      if (changes[key].newValue) footer.show()
+      else footer.hide()
+    } else if (key === 'showMenu') {
+      if (changes[key].newValue) menu.show()
+      else menu.hide()
+    }
+  }
+})
