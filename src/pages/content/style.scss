@@ -285,11 +285,15 @@
     justify-content: center;
     gap: 8px;
     cursor: pointer;
-    color: var(--text-secondary);
+    color: var(--text-placeholder);
 
     padding: 0px 16px;
     border-radius: 6px;
     border: 1px solid var(--border-primary);
     background-color: var(--bg-primary-neutral);
+
+    &:hover {
+      color: var(--text-secondary);
+    }
   }
 }
