@@ -3,11 +3,15 @@ import type { Dispatch } from 'react'
 import { deepMap } from 'nanostores'
 import { getLinks } from '@src/shared/links'
 import { settings } from './userSettings'
+import { footer, menu } from './uiElements'
+import { useStore } from '@nanostores/react'
 
 export type Option = {
   id: string
   name: string
   action: () => void
+  renderName?: () => React.ReactNode
+  renderDescription?: () => React.ReactNode
   status?: 'new' | 'beta'
   caption?: string
   description?: string
@@ -24,11 +28,19 @@ function getOptions(): Record<string, Option> {
     {
       id: 'toggle-footer',
       name: 'Toggle footer',
+      renderName: () => {
+        const { showFooter } = useStore(settings.store)
+        return showFooter ? 'Hide footer' : 'Show footer'
+      },
       action: () => settings.toggleFooter(),
     },
     {
       id: 'toggle-left-menu',
       name: 'Toggle left menu',
+      renderName: () => {
+        const { showMenu } = useStore(settings.store)
+        return showMenu ? 'Hide left menu' : 'Show left menu'
+      },
       action: () => settings.toggleMenu(),
     },
     ...getLinks().map(linkToOption),

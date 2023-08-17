@@ -6,6 +6,7 @@ type Settings = {
   showMenu: boolean
   favourites: string[]
   openKey: string
+  showTrigger: boolean
 }
 type RawSettings = Partial<Settings>
 const keys: (keyof RawSettings)[] = [
@@ -13,6 +14,7 @@ const keys: (keyof RawSettings)[] = [
   'showMenu',
   'favourites',
   'openKey',
+  'showTrigger',
 ]
 
 const $rawSettings = map<RawSettings>({})
@@ -59,10 +61,11 @@ $rawSettings.listen(raw => {
 // Computed store with values that can be used in the app
 export const $settings = computed($rawSettings, raw => {
   const settings: Settings = {
-    showFooter: !(raw.showFooter === false),
-    showMenu: !(raw.showMenu === false),
+    showFooter: raw.showFooter ?? true,
+    showMenu: raw.showMenu ?? true,
     favourites: raw.favourites || [],
     openKey: raw.openKey || 'k',
+    showTrigger: raw.showTrigger ?? false,
   }
   return settings
 })
@@ -104,6 +107,12 @@ const toggleFavourite = action(
   }
 )
 
+const toggleTrigger = action($rawSettings, 'toggleTrigger', store => {
+  const current = store.get()['showTrigger']
+  if (current === true) store.setKey('showTrigger', false)
+  else store.setKey('showTrigger', true)
+})
+
 const setOpenKey = action($rawSettings, 'setOpenKey', (store, key) => {
   store.setKey('openKey', key)
 })
@@ -114,5 +123,6 @@ export const settings = {
   toggleFooter,
   toggleMenu,
   toggleFavourite,
+  toggleTrigger,
   setOpenKey,
 }

@@ -5,6 +5,7 @@ import { scoreOption } from '@src/model/scoreOption'
 import { SearchIcon } from '@src/shared/icons'
 import { useStore } from '@nanostores/react'
 import { settings } from '@src/model/userSettings'
+import { cmdStroke } from '@src/shared/cmdStroke'
 
 export function CommandMenu() {
   const [open, setOpen] = React.useState(false)
@@ -13,14 +14,14 @@ export function CommandMenu() {
   const setOpened = useCallback(() => setOpen(true), [])
   const options = useStore($options)
   const userSettings = useStore(settings.store)
-  const { openKey, favourites } = userSettings
+  const { openKey, favourites, showTrigger } = userSettings
 
-  // useCommandTrigger(setOpened)
+  useCommandTrigger(setOpened, openKey, showTrigger)
 
+  // Toggle the menu when ⌘K is pressed
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       const key = openKey
-      // Toggle the menu when ⌘K is pressed
       if (e.key === key && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
         setOpen(open => !open)
@@ -106,11 +107,26 @@ const OptionItem: FC<{
   isFav?: boolean
   onSelect: () => void
 }> = props => {
-  const { option, isFav: isFvav, onSelect } = props
+  const { option, isFav, onSelect } = props
+  const { name, renderName, iconUrl, id } = option
   return (
-    <Command.Item value={option.id} onSelect={onSelect}>
-      {isFvav && '★ '}
-      {option.name}
+    <Command.Item value={id} onSelect={onSelect}>
+      {isFav && '★ '}
+      {renderName ? renderName() : name}
+      {iconUrl && (
+        <img
+          src={iconUrl}
+          alt=""
+          style={{
+            width: 24,
+            height: 24,
+            position: 'absolute',
+            left: 8,
+            top: 8,
+            borderRadius: 4,
+          }}
+        />
+      )}
     </Command.Item>
   )
 }
@@ -140,20 +156,24 @@ const Description: FC<{
 }
 
 /** Add a button to the menu to open command menu */
-function useCommandTrigger(cb: () => void) {
+function useCommandTrigger(cb: () => void, key = 'k', showTrigger: boolean) {
   useEffect(() => {
+    if (!showTrigger) return
     const ulRoot = document.getElementsByClassName(
       'srf-report-sidebar-main'
     )[0] as HTMLElement
     if (!ulRoot) return
+    const wrapper = document.createElement('div')
+    wrapper.className = 'snav-trigger-wrapper'
     const btn = document.createElement('button')
     btn.className = 'snav-trigger'
-    btn.innerHTML = 'Command Menu'
+    btn.innerHTML = `Search (${cmdStroke(key.toUpperCase())})`
     btn.onclick = cb
-    ulRoot.insertBefore(btn, ulRoot.firstChild)
+    wrapper.appendChild(btn)
+    ulRoot.insertBefore(wrapper, ulRoot.firstChild)
 
     return () => {
-      ulRoot.removeChild(btn)
+      ulRoot.removeChild(wrapper)
     }
-  }, [cb])
+  }, [cb, key, showTrigger])
 }
