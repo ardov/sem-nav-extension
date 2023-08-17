@@ -1,39 +1,42 @@
-import { Option } from '../CommandMenu/state'
-import { toId } from '../shared/toId'
+import type { Link } from './types'
+import { toId } from '../toId'
 
-export function parseLeftMenu(): Option[] {
+export function parseLeftMenu(): Link[] {
   const ids = [] as string[]
   const links = [
     ...document.getElementsByClassName('srf-report-sidebar-main__link'),
   ] as HTMLAnchorElement[]
-  const filtered = links.filter(el => {
+  const uniqueLinks = links.filter(el => {
     const id = toId(el.innerText)
     if (ids.includes(id)) return false
     ids.push(id)
     return true
   })
-  return filtered.map(el => ({
+  return uniqueLinks.map(el => ({
+    type: 'tool',
     id: toId(el.innerText),
     name: el.innerText,
-    action: { type: 'goto', payload: el.href },
+    url: el.href,
   }))
 }
 
-export function parseExtraTools(): Option[] {
+export function parseExtraTools(): Link[] {
   const parent = document.getElementById(
     'srf-dropdown-menu-extra-tools'
   ) as HTMLDivElement
   if (!parent) return []
   const links = [...parent.childNodes] as HTMLAnchorElement[]
-  const filtered = links.filter(el => el.tagName === 'A')
-  return filtered.map(el => ({
-    id: toId(el.innerText),
-    name: el.innerText,
-    action: { type: 'goto', payload: el.href },
-  }))
+  return links
+    .filter(el => el.tagName === 'A')
+    .map(el => ({
+      type: 'extra-tool',
+      id: toId(el.innerText),
+      name: el.innerText,
+      url: el.href,
+    }))
 }
 
-export function parseResources(): Option[] {
+export function parseResources(): Link[] {
   const parent = document.getElementById(
     'srf-dropdown-menu-resources'
   ) as HTMLDivElement
@@ -50,10 +53,11 @@ export function parseResources(): Option[] {
         'srf-dropdown-menu-grid-item__text'
       )[0] as HTMLDivElement
       return {
+        type: 'resource',
         id: toId(titleEl.innerText),
         name: titleEl.innerText,
         description: descriptionEl.innerText,
-        action: { type: 'goto', payload: el.href },
+        url: el.href,
       }
     })
 }

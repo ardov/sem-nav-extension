@@ -1,24 +1,56 @@
 import React from 'react'
-import logo from '@assets/img/logo.svg'
-import '@pages/popup/Popup.css'
+import { useStore } from '@nanostores/react'
+import { settings } from '@src/model/userSettings'
+import { cmdStroke } from '@src/shared/cmdStroke'
 
-const Popup = () => {
+export const Popup = () => {
+  const userSettings = useStore(settings.store)
+  const { openKey, showFooter, showMenu, showTrigger } = userSettings
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p className="text-lime-400">
-          Edit <code>src/pages/popup/Popup.tsx</code> and save to reload.!!
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <div className="app">
+      <header className="app-header">Settings</header>
+
+      <label className="setting">
+        <span className="setting-label">Command menu</span>
+        <select
+          value={openKey}
+          onChange={e => settings.setOpenKey(e.target.value)}
         >
-          Learn React!
-        </a>
-      </header>
+          <option value="k">{cmdStroke('K')}</option>
+          <option value="e">{cmdStroke('E')}</option>
+          <option value="/">{cmdStroke('/')}</option>
+        </select>
+      </label>
+
+      <label className="setting">
+        <span className="setting-label">Menu trigger</span>
+        <select
+          value={String(showTrigger)}
+          onChange={e => settings.toggleTrigger()}
+        >
+          <option value="false">Hide</option>
+          <option value="true">Show</option>
+        </select>
+      </label>
+
+      <label className="setting">
+        <span className="setting-label">Left menu</span>
+        <select value={String(showMenu)} onChange={e => settings.toggleMenu()}>
+          <option value="false">Hide</option>
+          <option value="true">Show</option>
+        </select>
+      </label>
+
+      <label className="setting">
+        <span className="setting-label">Footer</span>
+        <select
+          value={String(showFooter)}
+          onChange={e => settings.toggleFooter()}
+        >
+          <option value="false">Hide</option>
+          <option value="true">Show</option>
+        </select>
+      </label>
     </div>
   )
 }

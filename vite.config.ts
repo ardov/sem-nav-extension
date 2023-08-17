@@ -52,7 +52,7 @@ export default defineConfig({
         // background: resolve(pagesDir, 'background', 'index.ts'),
         content: resolve(pagesDir, 'content', 'index.ts'),
         contentStyle: resolve(pagesDir, 'content', 'style.scss'),
-        // popup: resolve(pagesDir, 'popup', 'index.html'),
+        popup: resolve(pagesDir, 'popup', 'index.html'),
         // newtab: resolve(pagesDir, "newtab", "index.html"),
         // options: resolve(pagesDir, "options", "index.html"),
       },
