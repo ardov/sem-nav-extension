@@ -6,30 +6,38 @@ import { SearchIcon } from '@src/shared/icons'
 import { useStore } from '@nanostores/react'
 import { settings } from '@src/model/userSettings'
 import { cmdStroke } from '@src/shared/cmdStroke'
+import { folders } from '@src/model/folders'
+import { menuVisibility } from '@src/model/menuVisibility'
 
 export function CommandMenu() {
-  const [open, setOpen] = React.useState(false)
   const [value, setValue] = React.useState<string>('')
   const [search, setSearch] = React.useState<string>('')
-  const setOpened = useCallback(() => setOpen(true), [])
   const options = useStore($options)
   const userSettings = useStore(settings.store)
   const { openKey, favourites, showTrigger } = userSettings
+  const folderList = useStore(folders.store)
+  const currentFolder = useStore(folders.current)
+  const open = useStore(menuVisibility.store)
+  const isSearchEmpty = search === ''
 
-  useCommandTrigger(setOpened, openKey, showTrigger)
+  useCommandTrigger(openKey, showTrigger)
 
-  // Toggle the menu when ⌘K is pressed
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       const key = openKey
+      // Toggle the menu when ⌘K is pressed
       if (e.key === key && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
-        setOpen(open => !open)
+        menuVisibility.toggle()
+      }
+      // Remove folder on backspace
+      if (e.key === 'Backspace' && isSearchEmpty) {
+        folders.pop()
       }
     }
     document.addEventListener('keydown', down)
     return () => document.removeEventListener('keydown', down)
-  }, [openKey])
+  }, [openKey, isSearchEmpty])
 
   const toggleFav = useCallback(
     (e: React.KeyboardEvent) => {
@@ -41,10 +49,15 @@ export function CommandMenu() {
     [value]
   )
 
+  const lSearch = search.toLowerCase()
   const ids = Object.entries(options)
+    .filter(([id, option]) => {
+      if (!currentFolder) return true
+      return option.tags?.includes(currentFolder)
+    })
     .map(
       ([id, option]) =>
-        [id, scoreOption(option, favourites.includes(option.id), search)] as [
+        [id, scoreOption(option, favourites.includes(option.id), lSearch)] as [
           string,
           number,
         ]
@@ -63,10 +76,14 @@ export function CommandMenu() {
       shouldFilter={false}
       loop
       open={open}
-      onOpenChange={setOpen}
+      // open={true}
+      onOpenChange={menuVisibility.set}
       onKeyDown={toggleFav}
     >
       <div className="snav-header">
+        {folderList.map(name => (
+          <div className="snav-folder">{name}</div>
+        ))}
         <Command.Input
           autoFocus
           placeholder="What are you looking for?"
@@ -78,7 +95,11 @@ export function CommandMenu() {
 
       <div className="snav-content">
         <Command.List className="snav-list snav-scrollbar">
-          <Command.Empty>No results found.</Command.Empty>
+          {
+            // Cmdk has a bug not updating the value after facing an empty list
+            // This hack is used to prevent the empty list from showing up
+            ids.length === 0 && <Command.Item>Nothing found.</Command.Item>
+          }
           {ids.map(id => {
             return (
               <OptionItem
@@ -108,12 +129,12 @@ const OptionItem: FC<{
   onSelect: () => void
 }> = props => {
   const { option, isFav, onSelect } = props
-  const { name, renderName, iconUrl, id } = option
+  const { name, renderName, iconUrl, id, icon } = option
   return (
     <Command.Item value={id} onSelect={onSelect}>
       {isFav && '★ '}
       {renderName ? renderName() : name}
-      {iconUrl && (
+      {iconUrl ? (
         <img
           src={iconUrl}
           alt=""
@@ -126,7 +147,23 @@ const OptionItem: FC<{
             borderRadius: 4,
           }}
         />
-      )}
+      ) : icon ? (
+        <div
+          style={{
+            width: 24,
+            height: 24,
+            position: 'absolute',
+            left: 8,
+            top: 8,
+            borderRadius: 4,
+            verticalAlign: 'middle',
+            textAlign: 'center',
+            fontSize: '20px',
+          }}
+        >
+          {icon}
+        </div>
+      ) : null}
     </Command.Item>
   )
 }
@@ -146,7 +183,11 @@ const Description: FC<{
       <p>{option.description}</p>
       <div className="snav-tags">
         {option.tags?.map(tag => (
-          <button key={tag} className="snav-tag">
+          <button
+            key={tag}
+            className="snav-tag"
+            onClick={() => folders.push(tag)}
+          >
             {tag}
           </button>
         ))}
@@ -156,7 +197,7 @@ const Description: FC<{
 }
 
 /** Add a button to the menu to open command menu */
-function useCommandTrigger(cb: () => void, key = 'k', showTrigger: boolean) {
+function useCommandTrigger(key = 'k', showTrigger: boolean) {
   useEffect(() => {
     if (!showTrigger) return
     const ulRoot = document.getElementsByClassName(
@@ -168,12 +209,12 @@ function useCommandTrigger(cb: () => void, key = 'k', showTrigger: boolean) {
     const btn = document.createElement('button')
     btn.className = 'snav-trigger'
     btn.innerHTML = `Search (${cmdStroke(key.toUpperCase())})`
-    btn.onclick = cb
+    btn.onclick = menuVisibility.toggle
     wrapper.appendChild(btn)
     ulRoot.insertBefore(wrapper, ulRoot.firstChild)
 
     return () => {
       ulRoot.removeChild(wrapper)
     }
-  }, [cb, key, showTrigger])
+  }, [key, showTrigger])
 }

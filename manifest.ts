@@ -26,6 +26,7 @@ const manifest: chrome.runtime.ManifestV3 = {
       js: ['src/pages/content/index.js'],
       // KEY for cache invalidation
       css: ['assets/css/contentStyle<KEY>.chunk.css'],
+      run_at: 'document_start',
     },
   ],
   web_accessible_resources: [

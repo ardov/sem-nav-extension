@@ -1,10 +1,9 @@
 import type { Link } from '@src/shared/links/types'
-import type { Dispatch } from 'react'
 import { deepMap } from 'nanostores'
 import { getLinks } from '@src/shared/links'
 import { settings } from './userSettings'
-import { footer, menu } from './uiElements'
 import { useStore } from '@nanostores/react'
+import { menuVisibility } from './menuVisibility'
 
 export type Option = {
   id: string
@@ -26,13 +25,30 @@ function getOptions(): Record<string, Option> {
   let opts: Record<string, Option> = {}
   const optList: Option[] = [
     {
+      id: 'toggle-zen-mode',
+      name: 'Toggle zen mode',
+      renderName: () => {
+        const { zenMode } = useStore(settings.store)
+        return zenMode ? 'Turn off zen mode' : 'Turn on zen mode'
+      },
+      action: () => {
+        settings.toggleZenMode()
+        menuVisibility.set(false)
+      },
+      icon: '🧘',
+    },
+    {
       id: 'toggle-footer',
       name: 'Toggle footer',
       renderName: () => {
         const { showFooter } = useStore(settings.store)
         return showFooter ? 'Hide footer' : 'Show footer'
       },
-      action: () => settings.toggleFooter(),
+      action: () => {
+        settings.toggleFooter()
+        menuVisibility.set(false)
+      },
+      icon: '⚙️',
     },
     {
       id: 'toggle-left-menu',
@@ -41,7 +57,11 @@ function getOptions(): Record<string, Option> {
         const { showMenu } = useStore(settings.store)
         return showMenu ? 'Hide left menu' : 'Show left menu'
       },
-      action: () => settings.toggleMenu(),
+      action: () => {
+        settings.toggleMenu()
+        menuVisibility.set(false)
+      },
+      icon: '⚙️',
     },
     ...getLinks().map(linkToOption),
   ]

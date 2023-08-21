@@ -5,7 +5,7 @@ import { cmdStroke } from '@src/shared/cmdStroke'
 
 export const Popup = () => {
   const userSettings = useStore(settings.store)
-  const { openKey, showFooter, showMenu, showTrigger } = userSettings
+  const { openKey, showFooter, showMenu, showTrigger, zenMode } = userSettings
   return (
     <div className="app">
       <header className="app-header">Settings</header>
@@ -49,6 +49,17 @@ export const Popup = () => {
         >
           <option value="false">Hide</option>
           <option value="true">Show</option>
+        </select>
+      </label>
+
+      <label className="setting">
+        <span className="setting-label">Zen mode</span>
+        <select
+          value={String(zenMode)}
+          onChange={e => settings.toggleZenMode()}
+        >
+          <option value="false">Off</option>
+          <option value="true">On</option>
         </select>
       </label>
     </div>
