@@ -29,13 +29,13 @@
 }
 
 [cmdk-dialog] {
-  --width: 640px;
+  --width: 800px;
   z-index: 9999;
   position: fixed;
   left: calc(50% - var(--width) / 2);
   top: 48px;
   width: var(--width);
-  animation: 200ms ease-out showDialog;
+  animation: 300ms cubic-bezier(.2, 1.6, .4, .8) showDialog;
   transform-origin: center center;
 
   &[data-state='closed'] {
@@ -74,10 +74,13 @@
   --border-primary: #C4C7CF;
   --border-secondary: #E0E1E9;
   --bg-primary-neutral: #FFF;
+  --bg-secondary-neutral: #F7F8FA;
+  --bg-secondary-neutral-hover: #e0e1e9;
   --bg-secondary-info-hover: #C4E5FE;
 
   --scrollbar-foreground: #E0E1E9;
   --scrollbar-background: var(--bg-primary-neutral);
+
 
   .snav-scrollbar {
     scrollbar-color: var(--scrollbar-foreground) var(--scrollbar-background);
@@ -98,6 +101,7 @@
     background: var(--scrollbar-background);
   }
 
+  box-sizing: border-box;
   font-family: Inter;
   font-size: 16px;
   font-style: normal;
@@ -111,16 +115,36 @@
   min-height: min(400px, 80vh);
   max-height: calc(100vh - 96px);
 
-  background: var(--bg-primary-neutral, #FFF);
+  background: var(--bg-primary-neutral);
   border-radius: 16px;
-  border: 1px solid var(--border-primary, #C4C7CF);
+  border: 1px solid var(--border-primary);
 
   box-shadow: 0px 3px 8px 0px rgba(25, 27, 35, 0.20);
   overflow: hidden;
 
   .snav-header {
+    box-sizing: border-box;
     position: relative;
     width: 100%;
+    display: flex;
+    border-bottom: 1px solid var(--border-secondary);
+    width: 100%;
+    padding-left: 48px;
+    gap: 12px;
+  }
+
+  .snav-folder {
+    flex-shrink: 0;
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: none;
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    background: var(--bg-secondary-neutral-hover);
+    align-self: center;
+    margin-left: -8px;
   }
 
   .snav-search-icon {
@@ -128,7 +152,7 @@
     left: 20px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--text-placeholder, #8A8E9B);
+    color: var(--text-placeholder);
   }
 
   .snav-content {
@@ -167,6 +191,7 @@
       font-weight: 400;
       line-height: 24px;
       margin: 0;
+      white-space: pre-wrap;
     }
   }
 
@@ -179,8 +204,8 @@
   .snav-tag {
     padding: 4px 8px;
     border-radius: 4px;
-    border: 1px solid var(--border-secondary, #E0E1E9);
-    color: var(--text-primary, #191B23);
+    border: 1px solid var(--border-secondary);
+    color: var(--text-primary);
     font-size: 12px;
     font-weight: 500;
     line-height: 16px;
@@ -188,17 +213,17 @@
 }
 
 [cmdk-input] {
+  box-sizing: border-box;
   border: none;
-  border-bottom: 1px solid var(--border-secondary, #E0E1E9);
-  width: 100%;
+  flex-grow: 1;
   font-size: 16px;
   background: transparent;
   outline: none;
   color: var(--text-primary);
-  padding: 16px 0 16px 48px;
+  padding: 16px 0;
 
   &::placeholder {
-    color: var(--text-placeholder, #8A8E9B);
+    color: var(--text-placeholder);
   }
 }
 
@@ -217,7 +242,7 @@
   gap: 12px;
   color: var(--text-primary);
   padding: 8px 8px 8px 40px;
-  transition: all 150ms ease;
+  transition: all 0ms;
 
   &[data-selected='true'] {
     transition: all 50ms ease;

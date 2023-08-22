@@ -1,5 +1,4 @@
 import { action, computed, map, onMount, task } from 'nanostores'
-import { footer, menu } from './uiElements'
 
 type Settings = {
   showFooter: boolean
@@ -7,6 +6,7 @@ type Settings = {
   favourites: string[]
   openKey: string
   showTrigger: boolean
+  zenMode: boolean
 }
 type RawSettings = Partial<Settings>
 const keys: (keyof RawSettings)[] = [
@@ -15,6 +15,7 @@ const keys: (keyof RawSettings)[] = [
   'favourites',
   'openKey',
   'showTrigger',
+  'zenMode',
 ]
 
 const $rawSettings = map<RawSettings>({})
@@ -66,30 +67,26 @@ export const $settings = computed($rawSettings, raw => {
     favourites: raw.favourites || [],
     openKey: raw.openKey || 'k',
     showTrigger: raw.showTrigger ?? false,
+    zenMode: raw.zenMode ?? false,
   }
   return settings
-})
-
-$settings.listen(settings => {
-  if (settings.showFooter) footer.show()
-  else footer.hide()
-
-  if (settings.showMenu) menu.show()
-  else menu.hide()
 })
 
 // ACTIONS
 
 const toggleFooter = action($rawSettings, 'toggleFooter', store => {
-  const current = store.get()['showFooter']
-  if (current === false) store.setKey('showFooter', true)
-  else store.setKey('showFooter', false)
+  const current = store.get()['showFooter'] ?? true
+  store.setKey('showFooter', !current)
 })
 
 const toggleMenu = action($rawSettings, 'toggleMenu', store => {
-  const current = store.get()['showMenu']
-  if (current === false) store.setKey('showMenu', true)
-  else store.setKey('showMenu', false)
+  const current = store.get()['showMenu'] ?? true
+  store.setKey('showMenu', !current)
+})
+
+const toggleZenMode = action($rawSettings, 'toggleZenMode', store => {
+  const current = store.get()['zenMode'] ?? false
+  store.setKey('zenMode', !current)
 })
 
 const toggleFavourite = action(
@@ -107,13 +104,21 @@ const toggleFavourite = action(
   }
 )
 
-const toggleTrigger = action($rawSettings, 'toggleTrigger', store => {
-  const current = store.get()['showTrigger']
-  if (current === true) store.setKey('showTrigger', false)
-  else store.setKey('showTrigger', true)
-})
+const toggleTrigger = action(
+  $rawSettings,
+  'toggleTrigger',
+  (store, state?: boolean) => {
+    if (state !== undefined) {
+      store.setKey('showTrigger', state)
+      return
+    }
+    const current = store.get()['showTrigger']
+    if (current === true) store.setKey('showTrigger', false)
+    else store.setKey('showTrigger', true)
+  }
+)
 
-const setOpenKey = action($rawSettings, 'setOpenKey', (store, key) => {
+const setOpenKey = action($rawSettings, 'setOpenKey', (store, key: string) => {
   store.setKey('openKey', key)
 })
 
@@ -122,6 +127,7 @@ export const settings = {
   rawStore: $rawSettings,
   toggleFooter,
   toggleMenu,
+  toggleZenMode,
   toggleFavourite,
   toggleTrigger,
   setOpenKey,
