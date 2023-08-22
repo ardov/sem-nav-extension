@@ -12,13 +12,12 @@ import { menuVisibility } from '@src/model/menuVisibility'
 export function CommandMenu() {
   const [value, setValue] = React.useState<string>('')
   const [search, setSearch] = React.useState<string>('')
-  const options = useStore($options)
   const userSettings = useStore(settings.store)
   const { openKey, favourites, showTrigger } = userSettings
   const folderList = useStore(folders.store)
-  const currentFolder = useStore(folders.current)
   const open = useStore(menuVisibility.store)
   const isSearchEmpty = search === ''
+  const { items, options } = useFilteredOptions(search)
 
   useCommandTrigger(openKey, showTrigger)
 
@@ -49,34 +48,15 @@ export function CommandMenu() {
     [value]
   )
 
-  const lSearch = search.toLowerCase()
-  const ids = Object.entries(options)
-    .filter(([id, option]) => {
-      if (!currentFolder) return true
-      return option.tags?.includes(currentFolder)
-    })
-    .map(
-      ([id, option]) =>
-        [id, scoreOption(option, favourites.includes(option.id), lSearch)] as [
-          string,
-          number,
-        ]
-    )
-    .filter(([id, score]) => score > 0)
-    .sort((a, b) => b[1] - a[1])
-    .map(([id, score]) => id)
-
   const currOption = options[value]
 
   return (
     <Command.Dialog
       value={value}
       onValueChange={setValue}
-      // filter={filter}
       shouldFilter={false}
       loop
       open={open}
-      // open={true}
       onOpenChange={menuVisibility.set}
       onKeyDown={toggleFav}
     >
@@ -95,21 +75,7 @@ export function CommandMenu() {
 
       <div className="snav-content">
         <Command.List className="snav-list snav-scrollbar">
-          {
-            // Cmdk has a bug not updating the value after facing an empty list
-            // This hack is used to prevent the empty list from showing up
-            ids.length === 0 && <Command.Item>Nothing found.</Command.Item>
-          }
-          {ids.map(id => {
-            return (
-              <OptionItem
-                key={id}
-                option={options[id]}
-                isFav={favourites.includes(id)}
-                onSelect={options[id].action}
-              />
-            )
-          })}
+          {items}
         </Command.List>
 
         <div className="snav-details snav-scrollbar">
@@ -217,4 +183,46 @@ function useCommandTrigger(key = 'k', showTrigger: boolean) {
       ulRoot.removeChild(wrapper)
     }
   }, [key, showTrigger])
+}
+
+function useFilteredOptions(search: string) {
+  search = search.toLowerCase()
+  const options = useStore($options)
+  const userSettings = useStore(settings.store)
+  const { favourites } = userSettings
+  const currentFolder = useStore(folders.current)
+
+  const ids = Object.entries(options)
+    .filter(([id, option]) => {
+      if (!currentFolder) return true
+      return option.tags?.includes(currentFolder)
+    })
+    .map(
+      ([id, option]) =>
+        [id, scoreOption(option, favourites.includes(option.id), search)] as [
+          string,
+          number,
+        ]
+    )
+    .filter(([id, score]) => score > 0)
+    .sort((a, b) => b[1] - a[1])
+    .map(([id, score]) => id)
+
+  const items = useMemo(() => {
+    // Cmdk has a bug not updating the value after facing an empty list
+    // This hack is used to prevent the empty list from showing up
+    if (ids.length === 0) return [<Command.Item>Nothing found.</Command.Item>]
+    return ids.map(id => {
+      return (
+        <OptionItem
+          key={id}
+          option={options[id]}
+          isFav={favourites.includes(id)}
+          onSelect={options[id].action}
+        />
+      )
+    })
+  }, [ids, options, favourites])
+
+  return { items, options }
 }
