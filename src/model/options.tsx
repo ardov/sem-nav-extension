@@ -4,6 +4,7 @@ import { getLinks } from '@src/shared/links'
 import { settings } from './userSettings'
 import { useStore } from '@nanostores/react'
 import { menuVisibility } from './menuVisibility'
+import { folders } from './folders'
 
 export type Option = {
   id: string
@@ -62,6 +63,14 @@ function getOptions(): Record<string, Option> {
         menuVisibility.set(false)
       },
       icon: '⚙️',
+    },
+    {
+      id: 'seo',
+      name: 'SEO',
+      action: () => {
+        folders.push('SEO')
+      },
+      icon: '📂',
     },
     ...getLinks().map(linkToOption),
   ]

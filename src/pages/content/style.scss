@@ -81,6 +81,9 @@
   --scrollbar-foreground: #E0E1E9;
   --scrollbar-background: var(--bg-primary-neutral);
 
+  b {
+    font-weight: 700;
+  }
 
   .snav-scrollbar {
     scrollbar-color: var(--scrollbar-foreground) var(--scrollbar-background);

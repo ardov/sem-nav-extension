@@ -3,6 +3,7 @@ import { action, computed, map, onMount, task } from 'nanostores'
 type Settings = {
   showFooter: boolean
   showMenu: boolean
+  stickySidebar: boolean
   favourites: string[]
   openKey: string
   showTrigger: boolean
@@ -12,11 +13,22 @@ type RawSettings = Partial<Settings>
 const keys: (keyof RawSettings)[] = [
   'showFooter',
   'showMenu',
+  'stickySidebar',
   'favourites',
   'openKey',
   'showTrigger',
   'zenMode',
 ]
+
+const defaults: Settings = {
+  showFooter: true,
+  showMenu: true,
+  stickySidebar: false,
+  favourites: [],
+  openKey: 'k',
+  showTrigger: false,
+  zenMode: false,
+}
 
 const $rawSettings = map<RawSettings>({})
 
@@ -62,32 +74,54 @@ $rawSettings.listen(raw => {
 // Computed store with values that can be used in the app
 export const $settings = computed($rawSettings, raw => {
   const settings: Settings = {
-    showFooter: raw.showFooter ?? true,
-    showMenu: raw.showMenu ?? true,
-    favourites: raw.favourites || [],
-    openKey: raw.openKey || 'k',
-    showTrigger: raw.showTrigger ?? false,
-    zenMode: raw.zenMode ?? false,
+    showFooter: raw.showFooter ?? defaults.showFooter,
+    showMenu: raw.showMenu ?? defaults.showMenu,
+    stickySidebar: raw.stickySidebar ?? defaults.stickySidebar,
+    favourites: raw.favourites || defaults.favourites,
+    openKey: raw.openKey || defaults.openKey,
+    showTrigger: raw.showTrigger ?? defaults.showTrigger,
+    zenMode: raw.zenMode ?? defaults.zenMode,
   }
   return settings
 })
 
 // ACTIONS
 
-const toggleFooter = action($rawSettings, 'toggleFooter', store => {
-  const current = store.get()['showFooter'] ?? true
-  store.setKey('showFooter', !current)
-})
+const toggleFooter = action(
+  $rawSettings,
+  'toggleFooter',
+  (store, state?: boolean) => {
+    state = state ?? !(store.get()['showFooter'] ?? defaults.showFooter)
+    store.setKey('showFooter', state)
+  }
+)
 
-const toggleMenu = action($rawSettings, 'toggleMenu', store => {
-  const current = store.get()['showMenu'] ?? true
-  store.setKey('showMenu', !current)
-})
+const toggleMenu = action(
+  $rawSettings,
+  'toggleMenu',
+  (store, state?: boolean) => {
+    state = state ?? !(store.get()['showMenu'] ?? defaults.showMenu)
+    store.setKey('showMenu', state)
+  }
+)
 
-const toggleZenMode = action($rawSettings, 'toggleZenMode', store => {
-  const current = store.get()['zenMode'] ?? false
-  store.setKey('zenMode', !current)
-})
+const toggleSticky = action(
+  $rawSettings,
+  'toggleSticky',
+  (store, state?: boolean) => {
+    state = state ?? !(store.get()['stickySidebar'] ?? defaults.stickySidebar)
+    store.setKey('stickySidebar', state)
+  }
+)
+
+const toggleZenMode = action(
+  $rawSettings,
+  'toggleZenMode',
+  (store, state?: boolean) => {
+    state = state ?? !(store.get()['zenMode'] ?? defaults.zenMode)
+    store.setKey('zenMode', state)
+  }
+)
 
 const toggleFavourite = action(
   $rawSettings,
@@ -108,13 +142,8 @@ const toggleTrigger = action(
   $rawSettings,
   'toggleTrigger',
   (store, state?: boolean) => {
-    if (state !== undefined) {
-      store.setKey('showTrigger', state)
-      return
-    }
-    const current = store.get()['showTrigger']
-    if (current === true) store.setKey('showTrigger', false)
-    else store.setKey('showTrigger', true)
+    state = state ?? !(store.get()['showTrigger'] ?? defaults.showTrigger)
+    store.setKey('showTrigger', state)
   }
 )
 
@@ -127,6 +156,7 @@ export const settings = {
   rawStore: $rawSettings,
   toggleFooter,
   toggleMenu,
+  toggleSticky,
   toggleZenMode,
   toggleFavourite,
   toggleTrigger,

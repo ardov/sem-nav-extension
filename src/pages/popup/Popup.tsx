@@ -22,20 +22,14 @@ export const Popup = () => {
         </select>
       </label>
 
+      <LeftMenuSetting />
+
       <label className="setting">
         <span className="setting-label">Menu trigger</span>
         <select
           value={String(showTrigger)}
           onChange={e => settings.toggleTrigger()}
         >
-          <option value="false">Hide</option>
-          <option value="true">Show</option>
-        </select>
-      </label>
-
-      <label className="setting">
-        <span className="setting-label">Left menu</span>
-        <select value={String(showMenu)} onChange={e => settings.toggleMenu()}>
           <option value="false">Hide</option>
           <option value="true">Show</option>
         </select>
@@ -67,3 +61,54 @@ export const Popup = () => {
 }
 
 export default Popup
+
+function ToggleSetting(props: {
+  label: string
+  value: boolean
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void
+}) {
+  const { label, value, onChange } = props
+  return (
+    <label className="setting">
+      <span className="setting-label">{label}</span>
+      <select value={String(value)} onChange={onChange}>
+        <option value="false">Hide</option>
+        <option value="true">Show</option>
+      </select>
+    </label>
+  )
+}
+
+function LeftMenuSetting() {
+  const userSettings = useStore(settings.store)
+  const { showMenu, stickySidebar } = userSettings
+  const value = showMenu ? (stickySidebar ? 'sticky' : 'normal') : 'hidden'
+  const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value
+    if (value === 'sticky') {
+      settings.toggleSticky(true)
+      settings.toggleMenu(true)
+      return
+    }
+    if (value === 'normal') {
+      settings.toggleSticky(false)
+      settings.toggleMenu(true)
+      return
+    }
+    if (value === 'hidden') {
+      settings.toggleMenu(false)
+      return
+    }
+  }
+
+  return (
+    <label className="setting">
+      <span className="setting-label">Left menu</span>
+      <select value={String(value)} onChange={onChange}>
+        <option value="normal">Normal</option>
+        <option value="sticky">Sticky</option>
+        <option value="hidden">Hidden</option>
+      </select>
+    </label>
+  )
+}
