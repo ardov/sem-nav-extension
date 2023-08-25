@@ -1,16 +1,17 @@
 import { settings } from '@src/model/userSettings'
 
 // Class names
+const zenMode = 'snav-zen-mode'
 const hideFooter = 'snav-hide-footer'
 const hideSidebar = 'snav-hide-sidebar'
-const zenMode = 'snav-zen-mode'
+const stickySidebar = 'snav-sticky-sidebar'
 
 const styleToInject = `
 .${hideFooter} .srf-layout__footer {
   display: none;
 }
 
-.${hideSidebar} srf-layout__sidebar {
+.${hideSidebar} .srf-layout__sidebar {
   display: none;
 }
 
@@ -24,6 +25,27 @@ const styleToInject = `
   margin: 0 auto;
   max-width: 1200px;
   width: 100%;
+}
+
+.${stickySidebar} .srf-layout__sidebar {
+  width: 251px;
+}
+.${stickySidebar} .srf-menu-switcher {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  border-right: 1px solid #C4C7CF;
+  box-sizing: border-box;
+}
+.${stickySidebar} .srf-menu-switcher::-webkit-scrollbar {
+  display: none;
+}
+.${stickySidebar} .srf-menu-switcher:after {
+  border: none;
 }
 
 body {
@@ -45,5 +67,8 @@ export const initSemUI = () => {
 
     if (store.showMenu) document.body.classList.remove(hideSidebar)
     else document.body.classList.add(hideSidebar)
+
+    if (store.stickySidebar) document.body.classList.add(stickySidebar)
+    else document.body.classList.remove(stickySidebar)
   })
 }

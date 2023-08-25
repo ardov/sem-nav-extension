@@ -1,25 +1,22 @@
-import { $options, type Option } from '@src/model/options'
-import React, { FC, useCallback, useEffect, useMemo } from 'react'
+import { type Option } from '@src/model/options'
+import React, { FC, useCallback } from 'react'
 import { Command } from 'cmdk'
-import { scoreOption } from '@src/model/scoreOption'
 import { SearchIcon } from '@src/shared/icons'
 import { useStore } from '@nanostores/react'
 import { settings } from '@src/model/userSettings'
-import { cmdStroke } from '@src/shared/cmdStroke'
 import { folders } from '@src/model/folders'
 import { menuVisibility } from '@src/model/menuVisibility'
+import { useFilteredOptions } from './useFilteredOptions'
 
 export function CommandMenu() {
   const [value, setValue] = React.useState<string>('')
   const [search, setSearch] = React.useState<string>('')
   const userSettings = useStore(settings.store)
-  const { openKey, favourites, showTrigger } = userSettings
+  const { openKey, favourites } = userSettings
   const folderList = useStore(folders.store)
   const open = useStore(menuVisibility.store)
   const isSearchEmpty = search === ''
   const { items, options } = useFilteredOptions(search)
-
-  useCommandTrigger(openKey, showTrigger)
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -89,51 +86,6 @@ export function CommandMenu() {
   )
 }
 
-const OptionItem: FC<{
-  option: Option
-  isFav?: boolean
-  onSelect: () => void
-}> = props => {
-  const { option, isFav, onSelect } = props
-  const { name, renderName, iconUrl, id, icon } = option
-  return (
-    <Command.Item value={id} onSelect={onSelect}>
-      {isFav && '★ '}
-      {renderName ? renderName() : name}
-      {iconUrl ? (
-        <img
-          src={iconUrl}
-          alt=""
-          style={{
-            width: 24,
-            height: 24,
-            position: 'absolute',
-            left: 8,
-            top: 8,
-            borderRadius: 4,
-          }}
-        />
-      ) : icon ? (
-        <div
-          style={{
-            width: 24,
-            height: 24,
-            position: 'absolute',
-            left: 8,
-            top: 8,
-            borderRadius: 4,
-            verticalAlign: 'middle',
-            textAlign: 'center',
-            fontSize: '20px',
-          }}
-        >
-          {icon}
-        </div>
-      ) : null}
-    </Command.Item>
-  )
-}
-
 const Description: FC<{
   option: Option
   isFav?: boolean
@@ -160,69 +112,4 @@ const Description: FC<{
       </div>
     </>
   )
-}
-
-/** Add a button to the menu to open command menu */
-function useCommandTrigger(key = 'k', showTrigger: boolean) {
-  useEffect(() => {
-    if (!showTrigger) return
-    const ulRoot = document.getElementsByClassName(
-      'srf-report-sidebar-main'
-    )[0] as HTMLElement
-    if (!ulRoot) return
-    const wrapper = document.createElement('div')
-    wrapper.className = 'snav-trigger-wrapper'
-    const btn = document.createElement('button')
-    btn.className = 'snav-trigger'
-    btn.innerHTML = `Search (${cmdStroke(key.toUpperCase())})`
-    btn.onclick = menuVisibility.toggle
-    wrapper.appendChild(btn)
-    ulRoot.insertBefore(wrapper, ulRoot.firstChild)
-
-    return () => {
-      ulRoot.removeChild(wrapper)
-    }
-  }, [key, showTrigger])
-}
-
-function useFilteredOptions(search: string) {
-  search = search.toLowerCase()
-  const options = useStore($options)
-  const userSettings = useStore(settings.store)
-  const { favourites } = userSettings
-  const currentFolder = useStore(folders.current)
-
-  const ids = Object.entries(options)
-    .filter(([id, option]) => {
-      if (!currentFolder) return true
-      return option.tags?.includes(currentFolder)
-    })
-    .map(
-      ([id, option]) =>
-        [id, scoreOption(option, favourites.includes(option.id), search)] as [
-          string,
-          number,
-        ]
-    )
-    .filter(([id, score]) => score > 0)
-    .sort((a, b) => b[1] - a[1])
-    .map(([id, score]) => id)
-
-  const items = useMemo(() => {
-    // Cmdk has a bug not updating the value after facing an empty list
-    // This hack is used to prevent the empty list from showing up
-    if (ids.length === 0) return [<Command.Item>Nothing found.</Command.Item>]
-    return ids.map(id => {
-      return (
-        <OptionItem
-          key={id}
-          option={options[id]}
-          isFav={favourites.includes(id)}
-          onSelect={options[id].action}
-        />
-      )
-    })
-  }, [ids, options, favourites])
-
-  return { items, options }
 }
