@@ -66,10 +66,26 @@ function getOptions(): Record<string, Option> {
     },
     {
       id: 'seo',
-      name: 'SEO',
-      action: () => {
-        folders.push('SEO')
-      },
+      name: 'SEO Tools',
+      action: () => folders.push('SEO'),
+      icon: '📂',
+    },
+    {
+      id: 'advertising',
+      name: 'Advertising Tools',
+      action: () => folders.push('Advertising'),
+      icon: '📂',
+    },
+    {
+      id: 'smm',
+      name: 'SMM Tools',
+      action: () => folders.push('Social media'),
+      icon: '📂',
+    },
+    {
+      id: 'content',
+      name: 'Content Tools',
+      action: () => folders.push('Content marketing'),
       icon: '📂',
     },
     ...getLinks().map(linkToOption),
