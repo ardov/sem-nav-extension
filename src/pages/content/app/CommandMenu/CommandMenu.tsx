@@ -1,18 +1,20 @@
-import { type Option } from '@src/model/options'
+import type { Option } from '@src/model/options'
 import React, { FC, useCallback } from 'react'
 import { Command } from 'cmdk'
-import { SearchIcon } from '@src/shared/icons'
 import { useStore } from '@nanostores/react'
-import { settings } from '@src/model/userSettings'
+import { SearchIcon } from '@src/shared/icons'
 import { folders } from '@src/model/folders'
 import { menuVisibility } from '@src/model/menuVisibility'
-import { useFilteredOptions } from './useFilteredOptions'
+import { openKeyModel } from '@src/model/userSettings'
+import { useFilteredOptions } from '@src/model/options'
+import { optionsMetaModel } from '@src/model/optionsMeta'
 
+const foldersToSwitch = [undefined, 'SEO', 'Advertising', 'Social Media']
 export function CommandMenu() {
   const [value, setValue] = React.useState<string>('')
   const [search, setSearch] = React.useState<string>('')
-  const userSettings = useStore(settings.store)
-  const { openKey, favourites } = userSettings
+  const openKey = useStore(openKeyModel.store)
+  const metaData = useStore(optionsMetaModel.store)
   const folderList = useStore(folders.store)
   const open = useStore(menuVisibility.store)
   const isSearchEmpty = search === ''
@@ -30,16 +32,22 @@ export function CommandMenu() {
       if (e.key === 'Backspace' && isSearchEmpty) {
         folders.pop()
       }
+      // Next folder
+      if (e.key === 'ArrowRight' && isSearchEmpty && folderList.length <= 1) {
+        const idx = foldersToSwitch.indexOf(folderList[0])
+        const nextFolder = foldersToSwitch[idx + 1]
+        folders.set(nextFolder ? [nextFolder] : [])
+      }
     }
     document.addEventListener('keydown', down)
     return () => document.removeEventListener('keydown', down)
-  }, [openKey, isSearchEmpty])
+  }, [openKey, isSearchEmpty, folderList])
 
   const toggleFav = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'l' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
-        settings.toggleFavourite(value)
+        optionsMetaModel.toggleFavourite(value)
       }
     },
     [value]
@@ -59,7 +67,9 @@ export function CommandMenu() {
     >
       <div className="snav-header">
         {folderList.map(name => (
-          <div className="snav-folder">{name}</div>
+          <div className="snav-folder" key={name}>
+            {name}
+          </div>
         ))}
         <Command.Input
           autoFocus
@@ -78,7 +88,7 @@ export function CommandMenu() {
         <div className="snav-details snav-scrollbar">
           <Description
             option={currOption}
-            isFav={favourites.includes(currOption?.id)}
+            isFav={metaData[currOption?.id]?.isFavourite}
           />
         </div>
       </div>

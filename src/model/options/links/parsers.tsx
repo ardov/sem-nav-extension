@@ -1,5 +1,5 @@
 import type { Link } from './types'
-import { toId } from '../toId'
+import { toId } from '../../../shared/toId'
 
 export function parseLeftMenu(): Link[] {
   const ids = [] as string[]

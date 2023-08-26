@@ -1,4 +1,4 @@
-import { link } from 'fs'
+export type { Link } from './types'
 import { apps } from './apps'
 import { extraTools } from './extraTools'
 import { menuTools } from './menuTools'
@@ -6,10 +6,7 @@ import { other } from './other'
 import { resources } from './resources'
 import { Link } from './types'
 
-export type { Link } from './types'
-
 export function getLinks() {
-  let ids = []
   return mergeLinks([
     ...menuTools,
     ...extraTools,
@@ -28,9 +25,7 @@ function mergeLinks(links: Link[]) {
     }
     // Assign non empty props from this link to the existing one
     Object.entries(link).forEach(([key, value]) => {
-      if (value) {
-        byId[link.id][key] = value
-      }
+      if (value) byId[link.id][key] = value
     })
   })
   return Object.values(byId)

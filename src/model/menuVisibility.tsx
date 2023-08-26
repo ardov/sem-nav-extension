@@ -1,4 +1,4 @@
-import { action, atom, computed } from 'nanostores'
+import { action, atom } from 'nanostores'
 
 const $menuVisibility = atom<boolean>(false)
 

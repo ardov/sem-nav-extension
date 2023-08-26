@@ -1,17 +1,17 @@
-import { $options, Option } from '@src/model/options'
+import { $options, Option } from '@src/model/options/options'
 import React, { useMemo } from 'react'
 import { Command } from 'cmdk'
-import { scoreOption } from '@src/model/scoreOption'
+import { scoreOption } from '@src/model/options/scoreOption'
 import { useStore } from '@nanostores/react'
-import { settings } from '@src/model/userSettings'
+
 import { folders } from '@src/model/folders'
 import { OptionItem } from './OptionItem'
+import { optionsMetaModel } from '../optionsMeta'
 
 export function useFilteredOptions(search: string) {
   search = search.toLowerCase()
   const options = useStore($options)
-  const userSettings = useStore(settings.store)
-  const { favourites } = userSettings
+  const metaData = useStore(optionsMetaModel.store)
   const currentFolder = useStore(folders.current)
 
   const contextOptions = useMemo(() => makeContextOptions(search), [search])
@@ -23,7 +23,7 @@ export function useFilteredOptions(search: string) {
     })
     .map(
       ([id, option]) =>
-        [id, scoreOption(option, favourites.includes(option.id), search)] as [
+        [id, scoreOption(option, metaData[option.id], search)] as [
           string,
           number,
         ]
@@ -36,13 +36,13 @@ export function useFilteredOptions(search: string) {
     // Cmdk has a bug not updating the value after facing an empty list
     // This hack is used to prevent the empty list from showing up
     if (ids.length === 0 && contextOptions.length === 0)
-      return [<Command.Item>Nothing found.</Command.Item>]
+      return [<Command.Item key="nothing-found">Nothing found.</Command.Item>]
     return [
       ...contextOptions.map(option => (
         <OptionItem
           key={option.id}
           option={option}
-          isFav={favourites.includes(option.id)}
+          isFav={metaData[option.id]?.isFavourite}
           onSelect={option.action}
         />
       )),
@@ -51,13 +51,16 @@ export function useFilteredOptions(search: string) {
           <OptionItem
             key={id}
             option={options[id]}
-            isFav={favourites.includes(id)}
-            onSelect={options[id].action}
+            isFav={metaData[id]?.isFavourite}
+            onSelect={() => {
+              optionsMetaModel.markUsed(id)
+              options[id].action()
+            }}
           />
         )
       }),
     ]
-  }, [ids, options, favourites, contextOptions])
+  }, [ids, contextOptions, metaData, options])
 
   return { items, options }
 }
@@ -76,7 +79,7 @@ function makeContextOptions(search: string): Option[] {
     results.push({
       id: 'go-to-domain-overview',
       name: `Open ${domain} in Domain Overview`,
-      renderName: () => (
+      RenderName: () => (
         <span>
           Open <b>{domain}</b> in Domain Overview
         </span>
@@ -95,7 +98,7 @@ function makeContextOptions(search: string): Option[] {
     results.push({
       id: 'go-to-traffic-analytics',
       name: `Open ${domain} in Traffic Analytics`,
-      renderName: () => (
+      RenderName: () => (
         <span>
           Open <b>{domain}</b> in Traffic Analytics
         </span>
@@ -132,9 +135,4 @@ function getDomainFromSearch(search: string) {
 function getSearchQuery() {
   const urlParams = new URLSearchParams(window.location.search)
   return urlParams.get('q') || ''
-}
-
-/** Current page path */
-function getPath() {
-  return window.location.pathname
 }

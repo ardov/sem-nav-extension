@@ -1,4 +1,9 @@
-import { settings } from '@src/model/userSettings'
+import {
+  showFooterModel,
+  showMenuModel,
+  stickySidebarModel,
+  zenModeModel,
+} from '@src/model/userSettings'
 
 // Class names
 const zenMode = 'snav-zen-mode'
@@ -27,9 +32,6 @@ const styleToInject = `
   width: 100%;
 }
 
-.${stickySidebar} .srf-layout__sidebar {
-  width: 251px;
-}
 .${stickySidebar} .srf-menu-switcher {
   position: sticky;
   top: 0;
@@ -58,17 +60,23 @@ export const initSemUI = () => {
   injectedStyle.innerHTML = styleToInject
   document.head.append(injectedStyle)
 
-  settings.store.listen(store => {
-    if (store.zenMode) document.body.classList.add(zenMode)
+  zenModeModel.store.listen(value => {
+    if (value) document.body.classList.add(zenMode)
     else document.body.classList.remove(zenMode)
+  })
 
-    if (store.showFooter) document.body.classList.remove(hideFooter)
+  showFooterModel.store.listen(value => {
+    if (value) document.body.classList.remove(hideFooter)
     else document.body.classList.add(hideFooter)
+  })
 
-    if (store.showMenu) document.body.classList.remove(hideSidebar)
+  showMenuModel.store.listen(value => {
+    if (value) document.body.classList.remove(hideSidebar)
     else document.body.classList.add(hideSidebar)
+  })
 
-    if (store.stickySidebar) document.body.classList.add(stickySidebar)
+  stickySidebarModel.store.listen(value => {
+    if (value) document.body.classList.add(stickySidebar)
     else document.body.classList.remove(stickySidebar)
   })
 }

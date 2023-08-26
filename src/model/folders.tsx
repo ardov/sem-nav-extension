@@ -26,6 +26,7 @@ const current = computed($folders, folders =>
 export const folders = {
   store: $folders,
   current,
+  set: $folders.set,
   pop,
   clear,
   push,

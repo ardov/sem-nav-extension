@@ -1,17 +1,17 @@
-import type { Link } from '@src/shared/links/types'
-import { deepMap } from 'nanostores'
-import { getLinks } from '@src/shared/links'
-import { settings } from './userSettings'
+import type { Link } from './links/types'
 import { useStore } from '@nanostores/react'
-import { menuVisibility } from './menuVisibility'
-import { folders } from './folders'
+import { deepMap } from 'nanostores'
+import { getLinks } from './links'
+import { menuVisibility } from '../menuVisibility'
+import { folders } from '../folders'
+import { showFooterModel, showMenuModel, zenModeModel } from '../userSettings'
 
 export type Option = {
   id: string
   name: string
   action: () => void
-  renderName?: () => React.ReactNode
-  renderDescription?: () => React.ReactNode
+  RenderName?: () => React.ReactNode
+  RenderDescription?: () => React.ReactNode
   status?: 'new' | 'beta'
   caption?: string
   description?: string
@@ -23,17 +23,17 @@ export type Option = {
 export const $options = deepMap<Record<string, Option>>(getOptions())
 
 function getOptions(): Record<string, Option> {
-  let opts: Record<string, Option> = {}
+  const opts: Record<string, Option> = {}
   const optList: Option[] = [
     {
       id: 'toggle-zen-mode',
       name: 'Toggle zen mode',
-      renderName: () => {
-        const { zenMode } = useStore(settings.store)
+      RenderName: () => {
+        const zenMode = useStore(zenModeModel.store)
         return zenMode ? 'Turn off zen mode' : 'Turn on zen mode'
       },
       action: () => {
-        settings.toggleZenMode()
+        zenModeModel.toggle()
         menuVisibility.set(false)
       },
       icon: '🧘',
@@ -41,12 +41,12 @@ function getOptions(): Record<string, Option> {
     {
       id: 'toggle-footer',
       name: 'Toggle footer',
-      renderName: () => {
-        const { showFooter } = useStore(settings.store)
+      RenderName: () => {
+        const showFooter = useStore(showFooterModel.store)
         return showFooter ? 'Hide footer' : 'Show footer'
       },
       action: () => {
-        settings.toggleFooter()
+        showFooterModel.toggle()
         menuVisibility.set(false)
       },
       icon: '⚙️',
@@ -54,12 +54,12 @@ function getOptions(): Record<string, Option> {
     {
       id: 'toggle-left-menu',
       name: 'Toggle left menu',
-      renderName: () => {
-        const { showMenu } = useStore(settings.store)
+      RenderName: () => {
+        const showMenu = useStore(showMenuModel.store)
         return showMenu ? 'Hide left menu' : 'Show left menu'
       },
       action: () => {
-        settings.toggleMenu()
+        showMenuModel.toggle()
         menuVisibility.set(false)
       },
       icon: '⚙️',

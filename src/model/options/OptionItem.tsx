@@ -1,4 +1,4 @@
-import { type Option } from '@src/model/options'
+import { type Option } from '@src/model/options/options'
 import React, { FC } from 'react'
 import { Command } from 'cmdk'
 
@@ -8,7 +8,7 @@ export const OptionItem: FC<{
   onSelect: () => void
 }> = props => {
   const { option, isFav, onSelect } = props
-  const { name, renderName, iconUrl, id, icon } = option
+  const { name, RenderName: renderName, iconUrl, id, icon } = option
   return (
     <Command.Item value={id} onSelect={onSelect}>
       {isFav && '★ '}
