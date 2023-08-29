@@ -1,25 +1,28 @@
-import { $options, Option } from '@src/model/options/options'
+import type { CollectionId, LinkId } from '@src/data'
+import { staticOptions } from '@src/model/options/staticOptions'
 import React, { useMemo } from 'react'
-import { Command } from 'cmdk'
+import { Command, CommandGroup } from 'cmdk'
 import { scoreOption } from '@src/model/options/scoreOption'
 import { useStore } from '@nanostores/react'
 
-import { folders } from '@src/model/folders'
+import { collectionModel } from '@src/model/collections'
 import { OptionItem } from './OptionItem'
 import { optionsMetaModel } from '../optionsMeta'
+import { makeContextOptions } from './contextOptions'
 
-export function useFilteredOptions(search: string) {
-  search = search.toLowerCase()
-  const options = useStore($options)
+export function FilteredOptions(props: { search: string }) {
+  const search = props.search.toLowerCase()
   const metaData = useStore(optionsMetaModel.store)
-  const currentFolder = useStore(folders.current)
-
+  const currentFolderId = useStore(collectionModel.current)
+  const currentFolder = staticOptions[currentFolderId]
   const contextOptions = useMemo(() => makeContextOptions(search), [search])
 
-  const ids = Object.entries(options)
-    .filter(([id, option]) => {
+  if (!search && !currentFolder) return <DefaultView key="default" />
+
+  const ids = Object.entries(staticOptions)
+    .filter(([id]) => {
       if (!currentFolder) return true
-      return option.tags?.includes(currentFolder)
+      return currentFolder.subItems.includes(id)
     })
     .map(
       ([id, option]) =>
@@ -28,111 +31,151 @@ export function useFilteredOptions(search: string) {
           number,
         ]
     )
-    .filter(([id, score]) => score > 0)
+    .filter(([, score]) => score > 0)
     .sort((a, b) => b[1] - a[1])
-    .map(([id, score]) => id)
+    .map(([id]) => id)
 
-  const items = useMemo(() => {
-    // Cmdk has a bug not updating the value after facing an empty list
-    // This hack is used to prevent the empty list from showing up
-    if (ids.length === 0 && contextOptions.length === 0)
-      return [<Command.Item key="nothing-found">Nothing found.</Command.Item>]
-    return [
-      ...contextOptions.map(option => (
+  // Cmdk has a bug not updating the value after facing an empty list
+  // This hack is used to prevent the empty list from showing up
+  if (ids.length === 0 && contextOptions.length === 0)
+    return [<Command.Item key="nothing-found">Nothing found.</Command.Item>]
+
+  return [
+    ...ids.map(id => {
+      return (
         <OptionItem
-          key={option.id}
-          option={option}
-          isFav={metaData[option.id]?.isFavourite}
-          onSelect={option.action}
+          key={id}
+          option={staticOptions[id]}
+          isFav={metaData[id]?.isFavourite}
+          onSelect={staticOptions[id].action}
         />
-      )),
-      ...ids.map(id => {
-        return (
-          <OptionItem
-            key={id}
-            option={options[id]}
-            isFav={metaData[id]?.isFavourite}
-            onSelect={() => {
-              optionsMetaModel.markUsed(id)
-              options[id].action()
-            }}
-          />
-        )
-      }),
-    ]
-  }, [ids, contextOptions, metaData, options])
-
-  return { items, options }
+      )
+    }),
+  ]
 }
 
-function makeContextOptions(search: string): Option[] {
-  const searchDomain = getDomainFromSearch(search)
-  const queryDomain = decodeURI(getSearchQuery())
-  const results = [] as Option[]
+const featuredCollections: CollectionId[] = [
+  'seo',
+  'smm',
+  'content',
+  'market-research',
+  'advertising',
+]
 
-  if (!searchDomain && !queryDomain) return results
-  if (search && !searchDomain) return results
+const suggestedSettings = ['toggle-zen-mode', 'toggle-left-menu']
 
-  const domain = searchDomain || queryDomain
+const suggestedApps: LinkId[] = [
+  'position-tracking',
+  'site-audit',
+  'backlink-analytics',
+  'keyword-magic-tool',
+  'organic-research',
+  'blog',
+  'topic-research',
+]
 
-  if (!location.pathname.startsWith('/analytics/overview/')) {
-    results.push({
-      id: 'go-to-domain-overview',
-      name: `Open ${domain} in Domain Overview`,
-      RenderName: () => (
-        <span>
-          Open <b>{domain}</b> in Domain Overview
-        </span>
-      ),
-      icon: '✨',
-      action: () => {
-        window.open(
-          `/analytics/overview/?searchType=domain&q=${encodeURI(domain)}`,
-          '_self'
-        )
-      },
-    })
-  }
+function DefaultView() {
+  const metaData = useStore(optionsMetaModel.store)
 
-  if (!location.pathname.startsWith('/analytics/traffic/')) {
-    results.push({
-      id: 'go-to-traffic-analytics',
-      name: `Open ${domain} in Traffic Analytics`,
-      RenderName: () => (
-        <span>
-          Open <b>{domain}</b> in Traffic Analytics
-        </span>
-      ),
-      icon: '✨',
-      action: () => {
-        window.open(
-          `/analytics/traffic/overview/?q=${encodeURI(domain)}`,
-          '_self'
-        )
-      },
-    })
-  }
+  const contextOptions = makeContextOptions('')
+  const featured = featuredCollections.map(id => staticOptions[id])
 
-  return results
-}
+  const favourites = Object.entries(metaData)
+    .filter(([, meta]) => meta.isFavourite)
+    .map(([id]) => staticOptions[id])
+    .filter(Boolean)
+    .filter(option => !featured.includes(option))
 
-/** Returns an domain + tld found in a given string.  */
-function getDomainFromSearch(search: string) {
-  const withDots = search
-    .split(' ')
-    .find(word => word.split('.').filter(Boolean).length > 1)
-  if (!withDots) return null
-  const domain = withDots
-    .replace('https://', '')
-    .replace('http://', '')
-    .replace('www.', '')
-    .split('/')[0]
-  if (!domain) return null
-  return domain
-}
+  const RECENT_GAP = 1000 * 60 * 60 * 12 // 12 hours
+  const recent = Object.entries(metaData)
+    .filter(
+      ([, meta]) => meta.lastUsed && Date.now() - meta.lastUsed < RECENT_GAP
+    )
+    .sort((a, b) => b[1].lastUsed - a[1].lastUsed)
+    .map(([id]) => staticOptions[id])
+    .filter(Boolean)
+    .filter(option => !featured.includes(option))
+    .filter(option => !favourites.includes(option))
+    .slice(0, 3)
 
-/** Get "q" parameter from current location */
-function getSearchQuery() {
-  const urlParams = new URLSearchParams(window.location.search)
-  return urlParams.get('q') || ''
+  const suggested = [...suggestedSettings, ...suggestedApps]
+    .map(id => staticOptions[id])
+    .filter(Boolean)
+    .filter(option => !featured.includes(option))
+    .filter(option => !favourites.includes(option))
+    .filter(option => !recent.includes(option))
+
+  return (
+    <>
+      {contextOptions.length > 0 && (
+        <CommandGroup key="context" heading="Context">
+          {contextOptions.map(option => (
+            <OptionItem
+              key={option.id}
+              option={option}
+              isFav={metaData[option.id]?.isFavourite}
+              onSelect={option.action}
+            />
+          ))}
+        </CommandGroup>
+      )}
+
+      {favourites.length > 0 && (
+        <CommandGroup key="favourites" heading="Favourites">
+          {favourites.map(option => (
+            <OptionItem
+              key={option.id}
+              option={option}
+              isFav={metaData[option.id]?.isFavourite}
+              onSelect={option.action}
+            />
+          ))}
+        </CommandGroup>
+      )}
+
+      {recent.length > 0 && (
+        <CommandGroup key="recent" heading="Recently used">
+          {recent.map(option => (
+            <OptionItem
+              key={option.id}
+              option={option}
+              isFav={metaData[option.id]?.isFavourite}
+              onSelect={option.action}
+            />
+          ))}
+        </CommandGroup>
+      )}
+
+      {featured.length > 0 && (
+        <CommandGroup
+          key="featured"
+          heading="Collections"
+          className="snav-collections-group"
+        >
+          {featured.map(option => (
+            <Command.Item
+              key={option.id}
+              onSelect={option.action}
+              className="snav-collections-group-item"
+            >
+              {option.name}
+            </Command.Item>
+          ))}
+        </CommandGroup>
+      )}
+
+      {suggested.length > 0 && (
+        <CommandGroup key="suggested" heading="Suggested">
+          {suggested.map(option => (
+            <OptionItem
+              key={option.id}
+              option={option}
+              isFav={metaData[option.id]?.isFavourite}
+              onSelect={option.action}
+            />
+          ))}
+        </CommandGroup>
+      )}
+    </>
+  )
 }

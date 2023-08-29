@@ -1,5 +1,17 @@
-import type { Link } from './types'
-import { toId } from '../../../shared/toId'
+import { toId } from '@src/shared/toId'
+
+export type Link = {
+  type: 'tool' | 'extra-tool' | 'resource' | 'app' | 'other'
+  id: string
+  name: string
+  url: string
+  status?: 'beta' | 'new'
+  projectUrl?: string
+  description?: string
+  tags?: string[]
+  iconUrl?: string
+  developer?: string
+}
 
 export function parseLeftMenu(): Link[] {
   const ids = [] as string[]

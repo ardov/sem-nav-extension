@@ -1,16 +1,14 @@
 import { action, atom, computed } from 'nanostores'
 
-const $folders = atom<string[]>([])
+const $collections = atom<string[]>([])
 
-const pop = action($folders, 'pop', store => {
+const pop = action($collections, 'pop', store => {
   store.set(store.get().slice(0, -1))
 })
 
-const clear = action($folders, 'clearFolders', store => {
-  store.set([])
-})
+const clear = action($collections, 'clearFolders', store => store.set([]))
 
-const push = action($folders, 'push', (store, folder: string) => {
+const push = action($collections, 'push', (store, folder: string) => {
   if (store.get().includes(folder)) {
     const filtered = store.get().filter(f => f !== folder)
     store.set([...filtered, folder])
@@ -19,14 +17,14 @@ const push = action($folders, 'push', (store, folder: string) => {
   store.set([...store.get(), folder])
 })
 
-const current = computed($folders, folders =>
+const current = computed($collections, folders =>
   folders.length ? folders[folders.length - 1] : ''
 )
 
-export const folders = {
-  store: $folders,
+export const collectionModel = {
+  store: $collections,
   current,
-  set: $folders.set,
+  set: $collections.set,
   pop,
   clear,
   push,

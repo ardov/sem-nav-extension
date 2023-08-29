@@ -3,11 +3,12 @@ import React, { FC, useCallback } from 'react'
 import { Command } from 'cmdk'
 import { useStore } from '@nanostores/react'
 import { SearchIcon } from '@src/shared/icons'
-import { folders } from '@src/model/folders'
+import { collectionModel } from '@src/model/collections'
 import { menuVisibility } from '@src/model/menuVisibility'
 import { openKeyModel } from '@src/model/userSettings'
-import { useFilteredOptions } from '@src/model/options'
 import { optionsMetaModel } from '@src/model/optionsMeta'
+import { FilteredOptions } from '@src/model/options/useFilteredOptions'
+import { staticOptions } from '@src/model/options/staticOptions'
 
 const foldersToSwitch = [undefined, 'SEO', 'Advertising', 'Social Media']
 export function CommandMenu() {
@@ -15,10 +16,9 @@ export function CommandMenu() {
   const [search, setSearch] = React.useState<string>('')
   const openKey = useStore(openKeyModel.store)
   const metaData = useStore(optionsMetaModel.store)
-  const folderList = useStore(folders.store)
+  const folderList = useStore(collectionModel.store)
   const open = useStore(menuVisibility.store)
   const isSearchEmpty = search === ''
-  const { items, options } = useFilteredOptions(search)
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -30,13 +30,13 @@ export function CommandMenu() {
       }
       // Remove folder on backspace
       if (e.key === 'Backspace' && isSearchEmpty) {
-        folders.pop()
+        collectionModel.pop()
       }
       // Next folder
       if (e.key === 'ArrowRight' && isSearchEmpty && folderList.length <= 1) {
         const idx = foldersToSwitch.indexOf(folderList[0])
         const nextFolder = foldersToSwitch[idx + 1]
-        folders.set(nextFolder ? [nextFolder] : [])
+        collectionModel.set(nextFolder ? [nextFolder] : [])
       }
     }
     document.addEventListener('keydown', down)
@@ -53,7 +53,7 @@ export function CommandMenu() {
     [value]
   )
 
-  const currOption = options[value]
+  const currOption = staticOptions[value]
 
   return (
     <Command.Dialog
@@ -82,7 +82,7 @@ export function CommandMenu() {
 
       <div className="snav-content">
         <Command.List className="snav-list snav-scrollbar">
-          {items}
+          <FilteredOptions search={search} />
         </Command.List>
 
         <div className="snav-details snav-scrollbar">
@@ -110,11 +110,11 @@ const Description: FC<{
       </h2>
       <p>{option.description}</p>
       <div className="snav-tags">
-        {option.tags?.map(tag => (
+        {option.collections?.map(tag => (
           <button
             key={tag}
             className="snav-tag"
-            onClick={() => folders.push(tag)}
+            onClick={() => collectionModel.push(tag)}
           >
             {tag}
           </button>

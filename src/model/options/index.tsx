@@ -1,2 +1,2 @@
 export { useFilteredOptions } from './useFilteredOptions'
-export type { Option } from './options'
+export type { Option } from './staticOptions'

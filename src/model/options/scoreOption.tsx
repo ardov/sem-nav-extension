@@ -1,5 +1,5 @@
 import { OptionMeta } from '../optionsMeta'
-import { Option } from './options'
+import { Option } from './staticOptions'
 
 export function scoreOption(
   option: Option,
