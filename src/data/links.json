@@ -1084,6 +1084,7 @@
     "content": {
       "id": "content",
       "name": "Content",
+      "description": "Create content that drives excellent marketing results.",
       "sub_collections": [
         "content-marketing",
         "content-creation",
@@ -1165,6 +1166,7 @@
     "smm": {
       "id": "smm",
       "name": "SMM",
+      "description": "Boost your social media marketing. Publish, analyze, and monitor content. Track competitors. Manage influencer campaigns.",
       "sub_collections": ["social-media-management"],
       "sub_collection_links": [
         "social-dashboard",
@@ -1254,6 +1256,7 @@
     "market-research": {
       "id": "market-research",
       "name": "Market Research",
+      "description": "Get a complete picture of your market and analyze your competitors’ strategies.",
       "sub_collections": [
         "competitor-analysis",
         "market-analysis",
@@ -1282,6 +1285,7 @@
     "advertising": {
       "id": "advertising",
       "name": "Advertising",
+      "description": "Get a complete picture of your advertising strategy and outsmart your competitors. Uncover the most profitable keywords for your PPC and paid search campaigns.",
       "sub_collections": ["ppc-keyword-research", "website-monetization"],
       "sub_collection_links": [
         "keyword-magic-tool",
@@ -1307,6 +1311,7 @@
     "seo": {
       "id": "seo",
       "name": "SEO",
+      "description": "Get a complete understanding of your website’s SEO health, compare your competitors, and find the best keywords for your content.",
       "sub_collections": [
         "keyword-research",
         "technical-seo",
