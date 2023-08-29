@@ -99,9 +99,8 @@ export function CommandMenu() {
 const Description: FC<{
   option: Option
   isFav?: boolean
-  onSelect?: () => void
 }> = props => {
-  const { option, isFav, onSelect } = props
+  const { option, isFav } = props
   if (!option) return null
   return (
     <>

@@ -4,6 +4,7 @@ import {
   stickySidebarModel,
   zenModeModel,
 } from '@src/model/userSettings'
+import { getElement } from '@src/shared/getElement'
 
 // Class names
 const zenMode = 'snav-zen-mode'
@@ -55,28 +56,31 @@ body {
 }
 `
 
-export const initSemUI = () => {
+export const initSemUI = async () => {
+  const head = await getElement(() => document.head)
+  const body = await getElement(() => document.body)
+
   const injectedStyle = document.createElement('style')
   injectedStyle.innerHTML = styleToInject
-  document.head.append(injectedStyle)
+  head.append(injectedStyle)
 
   zenModeModel.store.listen(value => {
-    if (value) document.body.classList.add(zenMode)
-    else document.body.classList.remove(zenMode)
+    if (value) body.classList.add(zenMode)
+    else body.classList.remove(zenMode)
   })
 
   showFooterModel.store.listen(value => {
-    if (value) document.body.classList.remove(hideFooter)
-    else document.body.classList.add(hideFooter)
+    if (value) body.classList.remove(hideFooter)
+    else body.classList.add(hideFooter)
   })
 
   showMenuModel.store.listen(value => {
-    if (value) document.body.classList.remove(hideSidebar)
-    else document.body.classList.add(hideSidebar)
+    if (value) body.classList.remove(hideSidebar)
+    else body.classList.add(hideSidebar)
   })
 
   stickySidebarModel.store.listen(value => {
-    if (value) document.body.classList.add(stickySidebar)
-    else document.body.classList.remove(stickySidebar)
+    if (value) body.classList.add(stickySidebar)
+    else body.classList.remove(stickySidebar)
   })
 }
