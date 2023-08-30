@@ -18,7 +18,6 @@ export const OptionItem: FC<{
         onSelect()
       }}
     >
-      {isFav && '★ '}
       {renderName ? renderName() : name}
       {iconUrl ? (
         <img

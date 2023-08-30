@@ -35,7 +35,7 @@ export const Popup = () => {
       <LeftMenuSetting />
 
       <label className="setting">
-        <span className="setting-label">Menu trigger</span>
+        <span className="setting-label">Search in menu</span>
         <select
           value={String(showTrigger)}
           onChange={e => showTriggerModel.toggle()}
@@ -58,10 +58,26 @@ export const Popup = () => {
 
       <label className="setting">
         <span className="setting-label">Zen mode</span>
-        <select value={String(zenMode)} onChange={e => zenModeModel.toggle()}>
+        <select value={String(zenMode)} onChange={() => zenModeModel.toggle()}>
           <option value="false">Off</option>
           <option value="true">On</option>
         </select>
+      </label>
+
+      <label className="setting">
+        <span className="setting-label">Usage data</span>
+        <button
+          onClick={() => chrome.storage.local.clear()}
+          style={{
+            padding: '0.5rem 1rem',
+            borderRadius: '0.5rem',
+            border: '1px solid #ccc',
+            background: 'transparent',
+            cursor: 'pointer',
+          }}
+        >
+          Clear
+        </button>
       </label>
     </div>
   )

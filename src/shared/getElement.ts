@@ -1,6 +1,6 @@
 /** Returns a promise for an element that may not exist yet */
-export function getElement<T>(getter: () => T, waitLimit = 60_000): Promise<T> {
-  const INTERVAL = 500
+export function getElement<T>(getter: () => T, waitLimit = 10_000): Promise<T> {
+  const INTERVAL = 300
   const start = Date.now()
   return new Promise<T>(resolve => {
     let el = getter()

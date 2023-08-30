@@ -2,7 +2,7 @@ import type { Option } from '@src/model/options'
 import React, { FC, useCallback } from 'react'
 import { Command } from 'cmdk'
 import { useStore } from '@nanostores/react'
-import { SearchIcon } from '@src/shared/icons'
+import { BookmarkFilledIcon, BookmarkIcon, SearchIcon } from '@src/shared/icons'
 import { collectionModel } from '@src/model/collections'
 import { menuVisibility } from '@src/model/menuVisibility'
 import { openKeyModel } from '@src/model/userSettings'
@@ -10,7 +10,7 @@ import { optionsMetaModel } from '@src/model/optionsMeta'
 import { FilteredOptions } from '@src/model/options/useFilteredOptions'
 import { staticOptions } from '@src/model/options/staticOptions'
 
-const foldersToSwitch = [undefined, 'SEO', 'Advertising', 'Social Media']
+// const foldersToSwitch = [undefined, 'SEO', 'Advertising', 'Social Media']
 export function CommandMenu() {
   const [value, setValue] = React.useState<string>('')
   const [search, setSearch] = React.useState<string>('')
@@ -33,11 +33,11 @@ export function CommandMenu() {
         collectionModel.pop()
       }
       // Next folder
-      if (e.key === 'ArrowRight' && isSearchEmpty && folderList.length <= 1) {
-        const idx = foldersToSwitch.indexOf(folderList[0])
-        const nextFolder = foldersToSwitch[idx + 1]
-        collectionModel.set(nextFolder ? [nextFolder] : [])
-      }
+      // if (e.key === 'ArrowRight' && isSearchEmpty && folderList.length <= 1) {
+      //   const idx = foldersToSwitch.indexOf(folderList[0])
+      //   const nextFolder = foldersToSwitch[idx + 1]
+      //   collectionModel.set(nextFolder ? [nextFolder] : [])
+      // }
     }
     document.addEventListener('keydown', down)
     return () => document.removeEventListener('keydown', down)
@@ -66,9 +66,9 @@ export function CommandMenu() {
       onKeyDown={toggleFav}
     >
       <div className="snav-header">
-        {folderList.map(name => (
-          <div className="snav-folder" key={name}>
-            {name}
+        {folderList.map(id => (
+          <div className="snav-folder" key={id}>
+            {staticOptions[id]?.name}
           </div>
         ))}
         <Command.Input
@@ -104,21 +104,50 @@ const Description: FC<{
   if (!option) return null
   return (
     <>
-      <h2>
-        {option.name} {isFav ? '★' : ''}
-      </h2>
-      <p>{option.description}</p>
-      <div className="snav-tags">
-        {option.collections?.map(tag => (
-          <button
-            key={tag}
-            className="snav-tag"
-            onClick={() => collectionModel.push(tag)}
-          >
-            {tag}
-          </button>
-        ))}
+      <div className="snav-details-header">
+        <h2>{option.name}</h2>
+        <button
+          style={{
+            marginLeft: 'auto',
+            flexShrink: 0,
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: '0',
+            color: 'inherit',
+          }}
+          onClick={() => optionsMetaModel.toggleFavourite(option.id)}
+        >
+          {isFav ? <BookmarkFilledIcon /> : <BookmarkIcon />}
+        </button>
       </div>
+
+      {(option.collections?.length > 0 || option?.developer) && (
+        <div className="snav-tags">
+          {option?.developer && (
+            <span
+              className="snav-tag"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              by {option.developer}
+            </span>
+          )}
+          {option.collections?.map(id => (
+            <button
+              key={id}
+              className="snav-tag"
+              style={{ cursor: 'pointer' }}
+              onClick={() => collectionModel.set([id])}
+            >
+              {staticOptions[id]?.name}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* {option?.developer && <p>by {option.developer}</p>} */}
+
+      <p>{option.description}</p>
     </>
   )
 }
