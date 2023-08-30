@@ -4,7 +4,7 @@ import { action, atom } from 'nanostores'
 export const zenModeModel = makeBooleanModel('zenMode', false)
 export const showMenuModel = makeBooleanModel('showMenu', true)
 export const showFooterModel = makeBooleanModel('showFooter', true)
-export const showTriggerModel = makeBooleanModel('showTrigger', false)
+export const showTriggerModel = makeBooleanModel('showTrigger', true)
 export const stickySidebarModel = makeBooleanModel('stickySidebar', false)
 
 const $openKey = atom('k')
