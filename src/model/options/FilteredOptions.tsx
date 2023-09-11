@@ -41,6 +41,14 @@ export function FilteredOptions(props: { search: string }) {
     return [<Command.Item key="nothing-found">Nothing found.</Command.Item>]
 
   return [
+    ...contextOptions.map(option => (
+      <OptionItem
+        key={option.id}
+        option={option}
+        isFav={metaData[option.id]?.isFavourite}
+        onSelect={option.action}
+      />
+    )),
     ...ids.map(id => {
       return (
         <OptionItem
