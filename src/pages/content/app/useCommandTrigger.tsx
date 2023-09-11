@@ -2,12 +2,12 @@ import { useEffect } from 'react'
 import { useStore } from '@nanostores/react'
 import { cmdStroke } from '@src/shared/cmdStroke'
 import { menuVisibility } from '@src/model/menuVisibility'
-import { settings } from '@src/model/userSettings'
+import { openKeyModel, showTriggerModel } from '@src/model/userSettings'
 
 /** Add a button to the menu to open command menu */
 export function useCommandTrigger() {
-  const userSettings = useStore(settings.store)
-  const { openKey, showTrigger } = userSettings
+  const showTrigger = useStore(showTriggerModel.store)
+  const openKey = useStore(openKeyModel.store)
 
   useEffect(() => {
     if (!showTrigger) return

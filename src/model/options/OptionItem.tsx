@@ -1,6 +1,7 @@
-import { type Option } from '@src/model/options'
+import { type Option } from '@src/model/options/staticOptions'
 import React, { FC } from 'react'
 import { Command } from 'cmdk'
+import { optionsMetaModel } from '../optionsMeta'
 
 export const OptionItem: FC<{
   option: Option
@@ -8,10 +9,15 @@ export const OptionItem: FC<{
   onSelect: () => void
 }> = props => {
   const { option, isFav, onSelect } = props
-  const { name, renderName, iconUrl, id, icon } = option
+  const { name, RenderName: renderName, iconUrl, id, icon } = option
   return (
-    <Command.Item value={id} onSelect={onSelect}>
-      {isFav && '★ '}
+    <Command.Item
+      value={id}
+      onSelect={() => {
+        optionsMetaModel.markUsed(id)
+        onSelect()
+      }}
+    >
       {renderName ? renderName() : name}
       {iconUrl ? (
         <img

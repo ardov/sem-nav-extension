@@ -1,11 +1,21 @@
 import React from 'react'
 import { useStore } from '@nanostores/react'
-import { settings } from '@src/model/userSettings'
 import { cmdStroke } from '@src/shared/cmdStroke'
+import {
+  openKeyModel,
+  showFooterModel,
+  showMenuModel,
+  showTriggerModel,
+  stickySidebarModel,
+  zenModeModel,
+} from '@src/model/userSettings'
 
 export const Popup = () => {
-  const userSettings = useStore(settings.store)
-  const { openKey, showFooter, showMenu, showTrigger, zenMode } = userSettings
+  const openKey = useStore(openKeyModel.store)
+  const showFooter = useStore(showFooterModel.store)
+  const showTrigger = useStore(showTriggerModel.store)
+  const zenMode = useStore(zenModeModel.store)
+
   return (
     <div className="app">
       <header className="app-header">Settings</header>
@@ -14,7 +24,7 @@ export const Popup = () => {
         <span className="setting-label">Command menu</span>
         <select
           value={openKey}
-          onChange={e => settings.setOpenKey(e.target.value)}
+          onChange={e => openKeyModel.set(e.target.value)}
         >
           <option value="k">{cmdStroke('K')}</option>
           <option value="e">{cmdStroke('E')}</option>
@@ -25,10 +35,10 @@ export const Popup = () => {
       <LeftMenuSetting />
 
       <label className="setting">
-        <span className="setting-label">Menu trigger</span>
+        <span className="setting-label">Search in menu</span>
         <select
           value={String(showTrigger)}
-          onChange={e => settings.toggleTrigger()}
+          onChange={e => showTriggerModel.toggle()}
         >
           <option value="false">Hide</option>
           <option value="true">Show</option>
@@ -39,7 +49,7 @@ export const Popup = () => {
         <span className="setting-label">Footer</span>
         <select
           value={String(showFooter)}
-          onChange={e => settings.toggleFooter()}
+          onChange={e => showFooterModel.toggle()}
         >
           <option value="false">Hide</option>
           <option value="true">Show</option>
@@ -48,13 +58,26 @@ export const Popup = () => {
 
       <label className="setting">
         <span className="setting-label">Zen mode</span>
-        <select
-          value={String(zenMode)}
-          onChange={e => settings.toggleZenMode()}
-        >
+        <select value={String(zenMode)} onChange={() => zenModeModel.toggle()}>
           <option value="false">Off</option>
           <option value="true">On</option>
         </select>
+      </label>
+
+      <label className="setting">
+        <span className="setting-label">Usage data</span>
+        <button
+          onClick={() => chrome.storage.local.clear()}
+          style={{
+            padding: '0.5rem 1rem',
+            borderRadius: '0.5rem',
+            border: '1px solid #ccc',
+            background: 'transparent',
+            cursor: 'pointer',
+          }}
+        >
+          Clear
+        </button>
       </label>
     </div>
   )
@@ -62,41 +85,24 @@ export const Popup = () => {
 
 export default Popup
 
-function ToggleSetting(props: {
-  label: string
-  value: boolean
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void
-}) {
-  const { label, value, onChange } = props
-  return (
-    <label className="setting">
-      <span className="setting-label">{label}</span>
-      <select value={String(value)} onChange={onChange}>
-        <option value="false">Hide</option>
-        <option value="true">Show</option>
-      </select>
-    </label>
-  )
-}
-
 function LeftMenuSetting() {
-  const userSettings = useStore(settings.store)
-  const { showMenu, stickySidebar } = userSettings
+  const showMenu = useStore(showMenuModel.store)
+  const stickySidebar = useStore(stickySidebarModel.store)
   const value = showMenu ? (stickySidebar ? 'sticky' : 'normal') : 'hidden'
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value
     if (value === 'sticky') {
-      settings.toggleSticky(true)
-      settings.toggleMenu(true)
+      stickySidebarModel.toggle(true)
+      showMenuModel.toggle(true)
       return
     }
     if (value === 'normal') {
-      settings.toggleSticky(false)
-      settings.toggleMenu(true)
+      stickySidebarModel.toggle(false)
+      showMenuModel.toggle(true)
       return
     }
     if (value === 'hidden') {
-      settings.toggleMenu(false)
+      showMenuModel.toggle(false)
       return
     }
   }
