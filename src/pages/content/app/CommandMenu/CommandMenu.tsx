@@ -7,7 +7,7 @@ import { collectionModel } from '@src/model/collections'
 import { menuVisibility } from '@src/model/menuVisibility'
 import { openKeyModel } from '@src/model/userSettings'
 import { optionsMetaModel } from '@src/model/optionsMeta'
-import { FilteredOptions } from '@src/model/options/useFilteredOptions'
+import { FilteredOptions } from '@src/model/options/FilteredOptions'
 import { staticOptions } from '@src/model/options/staticOptions'
 
 // const foldersToSwitch = [undefined, 'SEO', 'Advertising', 'Social Media']
