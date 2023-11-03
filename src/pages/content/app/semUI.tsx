@@ -50,10 +50,6 @@ const styleToInject = `
 .${stickySidebar} .srf-menu-switcher:after {
   border: none;
 }
-
-body {
-  background-color: #f4f5f9
-}
 `
 
 export const initSemUI = async () => {
