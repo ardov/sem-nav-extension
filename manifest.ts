@@ -23,6 +23,7 @@ const manifest: chrome.runtime.ManifestV3 = {
         // '<all_urls>',
         'https://*.semrush.com/*',
       ],
+      exclude_matches: ['https://developer.semrush.com/*'],
       js: ['src/pages/content/index.js'],
       // KEY for cache invalidation
       css: ['assets/css/contentStyle<KEY>.chunk.css'],
